@@ -306,6 +306,21 @@ export const dataService = {
       password,
       options: {
         data: userData,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+  },
+
+  async resendConfirmationEmail(email: string) {
+    if (!isSupabaseConfigured()) {
+      throw new Error("Supabase not configured. Please set up your environment variables.")
+    }
+
+    return await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     })
   },

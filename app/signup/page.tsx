@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Mail, Lock, User, GraduationCap } from "lucide-react"
+import { Loader2, Mail, Lock, User, GraduationCap, RefreshCw, CheckCircle } from "lucide-react"
 import { dataService } from "@/lib/data-service"
 
 export default function SignUpPage() {
@@ -23,6 +23,9 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendSuccess, setResendSuccess] = useState(false)
+  const [emailSent, setEmailSent] = useState("")
   const router = useRouter()
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -47,6 +50,7 @@ export default function SignUpPage() {
         setError(error.message)
       } else {
         setSuccess(true)
+        setEmailSent(formData.email)
       }
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred")
@@ -55,21 +59,96 @@ export default function SignUpPage() {
     }
   }
 
+  const handleResendEmail = async () => {
+    setResendLoading(true)
+    setResendSuccess(false)
+    
+    try {
+      const { error } = await dataService.resendConfirmationEmail(emailSent)
+      
+      if (error) {
+        setError("Failed to resend email. Please try again.")
+      } else {
+        setResendSuccess(true)
+        setTimeout(() => setResendSuccess(false), 3000)
+      }
+    } catch (err: any) {
+      setError("Failed to resend email. Please try again.")
+    } finally {
+      setResendLoading(false)
+    }
+  }
+
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
+            <div className="mx-auto mb-4 w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+            </div>
             <CardTitle className="text-2xl font-bold text-green-600">Check Your Email</CardTitle>
-            <CardDescription>We've sent you a verification link at {formData.email}</CardDescription>
+            <CardDescription>We've sent you a verification link at {emailSent}</CardDescription>
           </CardHeader>
-          <CardContent className="text-center">
-            <p className="text-sm text-muted-foreground mb-4">
+          <CardContent className="text-center space-y-4">
+            <p className="text-sm text-muted-foreground">
               Click the link in your email to verify your account and complete the signup process.
             </p>
-            <Button asChild variant="outline">
-              <Link href="/signin">Back to Sign In</Link>
-            </Button>
+            
+            {/* Email Troubleshooting Tips */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-left">
+              <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">Not receiving the email?</h4>
+              <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                <li>• Check your spam/junk folder</li>
+                <li>• Verify your email address is correct</li>
+                <li>• Wait a few minutes for delivery</li>
+                <li>• Try resending the confirmation email</li>
+                <li>• Some .edu domains have strict filtering</li>
+                <li>• Try using a different email provider temporarily</li>
+              </ul>
+            </div>
+
+            {/* Alternative Solutions */}
+            <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-lg text-left">
+              <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">Still having issues?</h4>
+              <p className="text-sm text-amber-700 dark:text-amber-300 mb-2">
+                If you continue to have problems receiving emails, you can:
+              </p>
+              <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1">
+                <li>• Contact your university IT department</li>
+                <li>• Try using a personal Gmail account temporarily</li>
+                <li>• Check if your email provider blocks Supabase emails</li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Button 
+                onClick={handleResendEmail} 
+                disabled={resendLoading}
+                variant="outline"
+                className="w-full"
+              >
+                {resendLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                )}
+                {resendSuccess ? "Email Sent!" : "Resend Confirmation Email"}
+              </Button>
+              
+              <Button asChild variant="outline">
+                <Link href="/signin">Back to Sign In</Link>
+              </Button>
+            </div>
+
+            {resendSuccess && (
+              <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20 dark:border-green-800">
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <AlertDescription className="text-green-800 dark:text-green-200">
+                  Confirmation email resent successfully!
+                </AlertDescription>
+              </Alert>
+            )}
           </CardContent>
         </Card>
       </div>
