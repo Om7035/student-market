@@ -6,7 +6,6 @@ import { Star, ArrowRight, Users, Shield, Zap, MapPin, TrendingUp, Award, Clock 
 import Link from "next/link"
 import { GigCard } from "@/components/gig-card"
 import { CategoryCard } from "@/components/category-card"
-import { SupabaseTest } from "@/components/supabase-test"
 import { mockCategories, mockGigs } from "@/lib/mock-data"
 import { Search } from "lucide-react" // Import Search component
 
@@ -500,17 +499,6 @@ export default function HomePage() {
               <span>Verified Students</span>
             </div>
           </div>
-        </div>
-      </section>
-      
-      {/* Temporary Debug Section */}
-      <section className="py-12 bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold text-center mb-8">Debug: Supabase Connection Test</h2>
-          <SupabaseTest />
-          <p className="text-center text-sm text-muted-foreground mt-4">
-            This debug section will be removed once the connection is working.
-          </p>
         </div>
       </section>
     </div>

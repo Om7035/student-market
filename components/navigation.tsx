@@ -16,10 +16,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { Search, Bell, MessageCircle, User, Settings, LogOut, Plus, MapPin, Target } from "lucide-react"
-import { dataService } from "@/lib/data-service"
-import { supabase } from "@/lib/supabase"
-import type { User as UserType } from "@/lib/types"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Search, Bell, MessageCircle, User, Settings, LogOut, Plus, MapPin, Target, DollarSign, Star, Package } from "lucide-react"
+import { useAuth } from "@/hooks/use-auth"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 // Mock notifications for unread count
@@ -30,10 +29,10 @@ const mockNotifications = [
 ]
 
 export function Navigation() {
-  const [user, setUser] = useState<UserType | null>(null)
+  const { user, loading, signOut, isAuthenticated } = useAuth()
   const [searchQuery, setSearchQuery] = useState("")
   const [isScrolled, setIsScrolled] = useState(false)
-  const [unreadCount, setUnreadCount] = useState(mockNotifications.filter((n) => !n.read).length)
+  const [unreadCount, setUnreadCount] = useState(2) // Mock unread notifications
   const router = useRouter()
 
   useEffect(() => {
@@ -42,40 +41,11 @@ export function Navigation() {
       setIsScrolled(window.scrollY > 10)
     }
     window.addEventListener("scroll", handleScroll)
-
-    // Get initial session
-    dataService.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        fetchUserProfile()
-      }
-    })
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = dataService.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        fetchUserProfile()
-      } else {
-        setUser(null)
-      }
-    })
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll)
-      subscription.unsubscribe()
-    }
+    return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const fetchUserProfile = async () => {
-    const userData = await dataService.getCurrentUser()
-    if (userData) {
-      setUser(userData)
-    }
-  }
-
   const handleSignOut = async () => {
-    await dataService.signOut()
+    await signOut()
     router.push("/")
   }
 
@@ -132,13 +102,20 @@ export function Navigation() {
               {/* Theme Toggle */}
               <ThemeToggle />
 
-              {user ? (
+              {loading ? (
+                /* Loading State */
+                <div className="flex items-center space-x-3">
+                  <Skeleton className="h-8 w-8 rounded-full" />
+                  <Skeleton className="h-9 w-20 rounded-xl" />
+                </div>
+              ) : isAuthenticated && user ? (
+                /* Authenticated User */
                 <>
                   {/* Create Gig Button */}
                   <Button
                     asChild
                     size="sm"
-                    className="hidden sm:flex bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl px-4"
+                    className="hidden sm:flex bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl px-4 shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     <Link href="/create-gig">
                       <Plus className="h-4 w-4 mr-2" />
@@ -146,26 +123,33 @@ export function Navigation() {
                     </Link>
                   </Button>
 
+                  {/* Dashboard */}
+                  <Button variant="ghost" size="sm" className="relative rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950" asChild>
+                    <Link href="/dashboard">
+                      <Package className="h-5 w-5" />
+                    </Link>
+                  </Button>
+
                   {/* Bids Dashboard */}
-                  <Button variant="ghost" size="sm" className="relative rounded-xl" asChild>
+                  <Button variant="ghost" size="sm" className="relative rounded-xl hover:bg-purple-50 dark:hover:bg-purple-950" asChild>
                     <Link href="/dashboard/bids">
                       <Target className="h-5 w-5" />
                     </Link>
                   </Button>
 
                   {/* Messages */}
-                  <Button variant="ghost" size="sm" className="relative rounded-xl" asChild>
+                  <Button variant="ghost" size="sm" className="relative rounded-xl hover:bg-green-50 dark:hover:bg-green-950" asChild>
                     <Link href="/messages">
                       <MessageCircle className="h-5 w-5" />
                     </Link>
                   </Button>
 
                   {/* Notifications */}
-                  <Button variant="ghost" size="sm" className="relative rounded-xl" asChild>
+                  <Button variant="ghost" size="sm" className="relative rounded-xl hover:bg-yellow-50 dark:hover:bg-yellow-950" asChild>
                     <Link href="/notifications">
                       <Bell className="h-5 w-5" />
                       {unreadCount > 0 && (
-                        <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 hover:bg-red-500">
+                        <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 hover:bg-red-500 animate-pulse">
                           {unreadCount}
                         </Badge>
                       )}
@@ -177,61 +161,84 @@ export function Navigation() {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="relative h-10 w-10 rounded-full ring-2 ring-blue-100 dark:ring-blue-900 hover:ring-blue-200 dark:hover:ring-blue-800 transition-all"
+                        className="relative h-10 w-10 rounded-full ring-2 ring-blue-100 dark:ring-blue-900 hover:ring-blue-200 dark:hover:ring-blue-800 transition-all duration-300 hover:scale-105"
                       >
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={user.avatar_url || ""} alt={user.full_name || ""} />
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-semibold">
                             {user.full_name?.charAt(0) || user.email.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
+                        {user.is_verified && (
+                          <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center">
+                            <Star className="h-2 w-2 text-white fill-current" />
+                          </div>
+                        )}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-64" align="end" forceMount>
-                      <div className="flex items-center justify-start gap-3 p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-lg m-2">
-                        <Avatar className="h-12 w-12">
+                    <DropdownMenuContent className="w-80" align="end" forceMount>
+                      {/* User Info Header */}
+                      <div className="flex items-center justify-start gap-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 rounded-lg m-2">
+                        <Avatar className="h-16 w-16 ring-2 ring-white dark:ring-gray-800">
                           <AvatarImage src={user.avatar_url || ""} alt={user.full_name || ""} />
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-lg font-bold">
                             {user.full_name?.charAt(0) || user.email.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="flex flex-col space-y-1 leading-none">
-                          <p className="font-semibold">{user.full_name || "User"}</p>
+                        <div className="flex flex-col space-y-1 leading-none flex-1">
+                          <p className="font-semibold text-lg">{user.full_name || "Student"}</p>
                           <p className="text-sm text-muted-foreground truncate">{user.email}</p>
-                          <Badge variant="secondary" className="text-xs w-fit">
-                            ₹{user.wallet_balance?.toLocaleString("en-IN") || "0"} balance
-                          </Badge>
+                          <p className="text-xs text-muted-foreground">{user.college}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge variant="secondary" className="text-xs">
+                              <DollarSign className="h-3 w-3 mr-1" />
+                              ₹{user.wallet_balance?.toLocaleString("en-IN") || "0"}
+                            </Badge>
+                            <Badge variant={user.is_verified ? "default" : "outline"} className="text-xs">
+                              <Star className="h-3 w-3 mr-1" />
+                              {user.reputation_score || 0}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
+                      
                       <DropdownMenuSeparator />
+                      
+                      {/* Menu Items */}
+                      <DropdownMenuItem asChild>
+                        <Link href={`/profile/${user.id}`} className="cursor-pointer">
+                          <User className="mr-3 h-4 w-4" />
+                          View Profile
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/profile/${user.id}/edit`} className="cursor-pointer">
+                          <Settings className="mr-3 h-4 w-4" />
+                          Edit Profile
+                        </Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href="/dashboard" className="cursor-pointer">
-                          <User className="mr-3 h-4 w-4" />
-                          Dashboard
+                          <Package className="mr-3 h-4 w-4" />
+                          My Dashboard
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/dashboard/bids" className="cursor-pointer">
+                        <Link href="/gigs?user=${user.id}" className="cursor-pointer">
                           <Target className="mr-3 h-4 w-4" />
-                          My Bids
+                          My Gigs
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/profile" className="cursor-pointer">
-                          <User className="mr-3 h-4 w-4" />
-                          Profile
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/settings" className="cursor-pointer">
-                          <Settings className="mr-3 h-4 w-4" />
-                          Settings
+                        <Link href="/reviews" className="cursor-pointer">
+                          <Star className="mr-3 h-4 w-4" />
+                          Reviews
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={handleSignOut}
-                        className="cursor-pointer text-red-600 dark:text-red-400"
+                        className="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
                       >
                         <LogOut className="mr-3 h-4 w-4" />
                         Sign out
@@ -240,23 +247,22 @@ export function Navigation() {
                   </DropdownMenu>
                 </>
               ) : (
+                /* Not Authenticated */
                 <div className="flex items-center space-x-3">
-                  <Button variant="ghost" asChild className="rounded-xl">
+                  <Button variant="ghost" asChild className="rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950">
                     <Link href="/signin">Sign In</Link>
                   </Button>
                   <Button
                     asChild
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
                     <Link href="/signup">Join Now</Link>
                   </Button>
                 </div>
               )}
-            </div>
           </div>
         </div>
       </nav>
-      {/* BidNotification component removed */}
     </>
   )
 }

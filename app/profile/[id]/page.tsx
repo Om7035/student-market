@@ -1,219 +1,304 @@
-import Link from "next/link"
-import { Suspense } from "react"
-import { notFound } from "next/navigation"
-import { dataService } from "@/lib/data-service"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+"use client"
+
+import { useState, useEffect } from "react"
+import { useParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Progress } from "@/components/ui/progress"
-import { Mail, MapPin, GraduationCap, Star, Edit } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
+import { 
+  Star, 
+  MapPin, 
+  Calendar, 
+  Mail, 
+  GraduationCap, 
+  Award, 
+  TrendingUp, 
+  Package,
+  MessageCircle,
+  Settings,
+  ShieldCheck,
+  DollarSign
+} from "lucide-react"
+import { dataService } from "@/lib/data-service"
+import { useAuth } from "@/hooks/use-auth"
 import { GigCard } from "@/components/gig-card"
 import { ReviewCard } from "@/components/review-card"
-import ProfileLoading from "../loading" // Import the loading component
+import type { User, Gig, Review } from "@/lib/types"
+import Link from "next/link"
 
-interface ProfilePageProps {
-  params: {
-    id: string
+export default function ProfilePage() {
+  const params = useParams()
+  const router = useRouter()
+  const { user: currentUser } = useAuth()
+  const [user, setUser] = useState<User | null>(null)
+  const [userGigs, setUserGigs] = useState<Gig[]>([])
+  const [userReviews, setUserReviews] = useState<Review[]>([])
+  const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState("overview")
+
+  const isOwnProfile = currentUser?.id === params.id
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const userData = await dataService.getUserById(params.id as string)
+        if (userData) {
+          setUser(userData)
+          
+          // Fetch user's gigs and reviews
+          const [gigs, reviews] = await Promise.all([
+            dataService.getUserGigs(userData.id),
+            dataService.getReviewsForUser(userData.id)
+          ])
+          
+          setUserGigs(gigs)
+          setUserReviews(reviews)
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (params.id) {
+      fetchUserProfile()
+    }
+  }, [params.id])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    )
   }
-}
-
-export default async function ProfilePage({ params }: ProfilePageProps) {
-  const { id } = params
-
-  const [user, currentUser, userGigs, userReviews] = await Promise.all([
-    dataService.getUserById(id),
-    dataService.getCurrentUser(),
-    dataService.getUserGigs(id),
-    dataService.getReviewsForUser(id),
-  ])
 
   if (!user) {
-    notFound()
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>User Not Found</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">The requested user profile could not be found.</p>
+            <Button asChild>
+              <Link href="/">Go Home</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  const isCurrentUserProfile = currentUser?.id === user.id
-
-  // Determine reputation level based on score
-  const getReputationLevel = (score: number) => {
-    if (score >= 900) return "Expert"
-    if (score >= 700) return "Advanced"
-    if (score >= 500) return "Intermediate"
-    return "Beginner"
-  }
+  const averageRating = userReviews.length > 0 
+    ? userReviews.reduce((sum, review) => sum + review.rating, 0) / userReviews.length 
+    : 0
 
   return (
-    <Suspense fallback={<ProfileLoading />}>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Left Column - Profile Info */}
-          <div className="w-full md:w-1/3 space-y-6">
-            <Card>
-              <CardContent className="flex flex-col items-center p-6">
-                <Avatar className="h-24 w-24 mb-4 border-2 border-primary">
-                  <AvatarImage src={user.avatar_url || "/placeholder.svg?height=100&width=100&query=user avatar"} />
-                  <AvatarFallback className="text-4xl">{user.full_name?.charAt(0) || "U"}</AvatarFallback>
+        {/* Profile Header */}
+        <Card className="mb-8">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              {/* Avatar and Basic Info */}
+              <div className="flex items-center gap-4">
+                <Avatar className="h-24 w-24 ring-4 ring-blue-100 dark:ring-blue-900">
+                  <AvatarImage src={user.avatar_url || ""} alt={user.full_name} />
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-2xl font-bold">
+                    {user.full_name?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
-                <h1 className="text-3xl font-bold text-center">{user.full_name}</h1>
-                <p className="text-muted-foreground text-center flex items-center gap-1">
-                  <Mail className="h-4 w-4" /> {user.email}
-                </p>
-                {user.city && (
-                  <p className="text-muted-foreground text-center flex items-center gap-1">
-                    <MapPin className="h-4 w-4" /> {user.city}
-                  </p>
-                )}
-                {user.college && (
-                  <p className="text-muted-foreground text-center flex items-center gap-1">
-                    <GraduationCap className="h-4 w-4" /> {user.college}
-                    {user.major && user.year && (
-                      <span>
-                        {" "}
-                        • {user.major} ({user.year} Year)
-                      </span>
+                <div className="space-y-1">
+                  <h1 className="text-3xl font-bold flex items-center gap-2">
+                    {user.full_name || "Student"}
+                    {user.is_verified && (
+                      <ShieldCheck className="h-6 w-6 text-green-500" />
                     )}
-                  </p>
-                )}
-                {isCurrentUserProfile && (
-                  <Button asChild variant="outline" className="mt-4 w-full bg-transparent">
+                  </h1>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Mail className="h-4 w-4" />
+                    <span>{user.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <GraduationCap className="h-4 w-4" />
+                    <span>{user.college}</span>
+                  </div>
+                  {user.city && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <MapPin className="h-4 w-4" />
+                      <span>{user.city}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">{averageRating.toFixed(1)}</div>
+                  <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
+                    <Star className="h-3 w-3 fill-current" />
+                    Rating
+                  </div>
+                </div>
+                <div className="text-center p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">{userGigs.length}</div>
+                  <div className="text-sm text-muted-foreground">Active Gigs</div>
+                </div>
+                <div className="text-center p-3 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">{userReviews.length}</div>
+                  <div className="text-sm text-muted-foreground">Reviews</div>
+                </div>
+                <div className="text-center p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg">
+                  <div className="text-2xl font-bold text-yellow-600">{user.reputation_score}</div>
+                  <div className="text-sm text-muted-foreground">Reputation</div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                {isOwnProfile ? (
+                  <Button asChild>
                     <Link href={`/profile/${user.id}/edit`}>
-                      <Edit className="h-4 w-4 mr-2" /> Edit Profile
+                      <Settings className="h-4 w-4 mr-2" />
+                      Edit Profile
                     </Link>
                   </Button>
+                ) : (
+                  <>
+                    <Button>
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Message
+                    </Button>
+                    <Button variant="outline">
+                      <Star className="h-4 w-4 mr-2" />
+                      Review
+                    </Button>
+                  </>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>About Me</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">{user.bio || "No bio provided yet."}</p>
-              </CardContent>
-            </Card>
+            {/* Bio */}
+            {user.bio && (
+              <div className="mt-6 pt-6 border-t">
+                <h3 className="font-semibold mb-2">About</h3>
+                <p className="text-muted-foreground">{user.bio}</p>
+              </div>
+            )}
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Skills</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-wrap gap-2">
-                {user.skills && user.skills.length > 0 ? (
-                  user.skills.map((skill, index) => (
+            {/* Skills */}
+            {user.skills && user.skills.length > 0 && (
+              <div className="mt-4">
+                <h3 className="font-semibold mb-2">Skills</h3>
+                <div className="flex flex-wrap gap-2">
+                  {user.skills.map((skill, index) => (
                     <Badge key={index} variant="secondary">
                       {skill}
                     </Badge>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground text-sm">No skills listed yet.</p>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Reputation & Rank</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">Reputation Level: {getReputationLevel(user.reputation_score)}</span>
-                    <span className="text-sm text-muted-foreground">{user.reputation_score} / 1000</span>
-                  </div>
-                  <Progress value={(user.reputation_score / 1000) * 100} className="h-2" />
+                  ))}
                 </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">Overall Rating:</span>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
-                      <span>
-                        {userGigs.length > 0
-                          ? (userGigs.reduce((sum, gig) => sum + gig.rating, 0) / userGigs.length).toFixed(1)
-                          : "N/A"}
-                      </span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="gigs">Gigs ({userGigs.length})</TabsTrigger>
+            <TabsTrigger value="reviews">Reviews ({userReviews.length})</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Recent Gigs */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Gigs</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {userGigs.slice(0, 3).map((gig) => (
+                    <div key={gig.id} className="mb-4 last:mb-0">
+                      <GigCard gig={gig} />
                     </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Based on {userGigs.reduce((sum, gig) => sum + gig.total_orders, 0)} orders across {userGigs.length}{" "}
-                    gigs.
-                  </p>
-                </div>
-                {/* Placeholder for City Rank - can be implemented with more complex logic */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">City Rank (Pune):</span>
-                    <span className="text-sm text-muted-foreground">#Top 10%</span> {/* Example placeholder */}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Your standing among students in Pune based on reputation and gig performance.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                  ))}
+                  {userGigs.length === 0 && (
+                    <p className="text-muted-foreground text-center py-4">No gigs yet</p>
+                  )}
+                </CardContent>
+              </Card>
 
-          {/* Right Column - Gigs & Reviews */}
-          <div className="w-full md:w-2/3 space-y-6">
-            <Tabs defaultValue="gigs" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="gigs">Gigs Created ({userGigs.length})</TabsTrigger>
-                <TabsTrigger value="reviews">Reviews Received ({userReviews.length})</TabsTrigger>
-              </TabsList>
-              <TabsContent value="gigs" className="mt-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Active Gigs by {user.full_name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {userGigs.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        {isCurrentUserProfile ? (
-                          <>
-                            <p className="mb-4">You haven't created any gigs yet.</p>
-                            <Button asChild>
-                              <Link href="/create-gig">Create Your First Gig</Link>
-                            </Button>
-                          </>
-                        ) : (
-                          <p>This user hasn't created any gigs yet.</p>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-                        {userGigs.map((gig) => (
-                          <GigCard key={gig.id} gig={gig} />
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              <TabsContent value="reviews" className="mt-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Reviews for {user.full_name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {userReviews.length === 0 ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        <p>No reviews received yet.</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {userReviews.map((review) => (
-                          <ReviewCard key={review.id} review={review} />
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
+              {/* Recent Reviews */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Reviews</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {userReviews.slice(0, 3).map((review) => (
+                    <div key={review.id} className="mb-4 last:mb-0">
+                      <ReviewCard review={review} />
+                    </div>
+                  ))}
+                  {userReviews.length === 0 && (
+                    <p className="text-muted-foreground text-center py-4">No reviews yet</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="gigs" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {userGigs.map((gig) => (
+                <GigCard key={gig.id} gig={gig} />
+              ))}
+            </div>
+            {userGigs.length === 0 && (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Gigs Yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    {isOwnProfile ? "You haven't created any gigs yet." : "This user hasn't created any gigs yet."}
+                  </p>
+                  {isOwnProfile && (
+                    <Button asChild>
+                      <Link href="/create-gig">Create Your First Gig</Link>
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="reviews" className="space-y-6">
+            <div className="space-y-4">
+              {userReviews.map((review) => (
+                <ReviewCard key={review.id} review={review} />
+              ))}
+            </div>
+            {userReviews.length === 0 && (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <Star className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Reviews Yet</h3>
+                  <p className="text-muted-foreground">
+                    {isOwnProfile ? "You haven't received any reviews yet." : "This user hasn't received any reviews yet."}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
-    </Suspense>
+    </div>
   )
 }

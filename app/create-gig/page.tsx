@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Upload,
   X,
@@ -31,6 +32,7 @@ import {
   Award,
 } from "lucide-react"
 import { dataService } from "@/lib/data-service"
+import { useAuth } from "@/hooks/use-auth"
 import type { Category, User } from "@/lib/types"
 
 interface GigFormData {
@@ -84,27 +86,34 @@ const deliveryOptions = [
 ]
 
 export default function CreateGigPage() {
+  const { user, loading: authLoading } = useAuth()
+  const router = useRouter()
   const [formData, setFormData] = useState<GigFormData>(initialFormData)
   const [categories, setCategories] = useState<Category[]>([])
-  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [currentStep, setCurrentStep] = useState(1)
   const [tagInput, setTagInput] = useState("")
   const [previewMode, setPreviewMode] = useState(false)
-  const router = useRouter()
 
   useEffect(() => {
-    fetchInitialData()
-  }, [])
+    if (!authLoading && !user) {
+      router.push('/login')
+      return
+    }
+    if (user) {
+      fetchInitialData()
+    }
+  }, [user, authLoading, router])
 
   const fetchInitialData = async () => {
+    if (!user) return
+    
     try {
-      const [categoriesData, userData] = await Promise.all([dataService.getCategories(), dataService.getCurrentUser()])
+      const categoriesData = await dataService.getCategories()
       setCategories(categoriesData)
-      setUser(userData)
     } catch (error) {
-      console.error("Error fetching data:", error)
+      console.error("Error fetching categories:", error)
     }
   }
 
@@ -212,7 +221,18 @@ export default function CreateGigPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="container mx-auto px-4 py-8">
+      {authLoading ? (
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <Skeleton className="h-10 w-96 mx-auto mb-4" />
+            <Skeleton className="h-6 w-[500px] mx-auto" />
+          </div>
+          <div className="max-w-4xl mx-auto">
+            <Skeleton className="h-[600px] w-full" />
+          </div>
+        </div>
+      ) : !user ? null : (
+        <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -754,7 +774,8 @@ export default function CreateGigPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      )}
     </div>
   )
 }

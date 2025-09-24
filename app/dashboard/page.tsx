@@ -6,37 +6,43 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Skeleton } from "@/components/ui/skeleton"
 import { DollarSign, ShoppingBag, Star, TrendingUp, Plus, Eye, MessageCircle } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { dataService } from "@/lib/data-service"
+import { useAuth } from "@/hooks/use-auth"
 import type { User, Gig, Order } from "@/lib/types"
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<User | null>(null)
+  const { user, loading: authLoading } = useAuth()
+  const router = useRouter()
   const [gigs, setGigs] = useState<Gig[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchDashboardData()
-  }, [])
+    if (!authLoading && !user) {
+      router.push('/login')
+      return
+    }
+    if (user) {
+      fetchDashboardData()
+    }
+  }, [user, authLoading, router])
 
   const fetchDashboardData = async () => {
+    if (!user) return
+    
     try {
-      // Fetch user profile
-      const userData = await dataService.getCurrentUser()
-      if (userData) {
-        setUser(userData)
+      // Fetch user's gigs and orders
+      const [userGigs, userOrders] = await Promise.all([
+        dataService.getUserGigs(user.id),
+        dataService.getUserOrders(user.id),
+      ])
 
-        // Fetch user's gigs and orders
-        const [userGigs, userOrders] = await Promise.all([
-          dataService.getUserGigs(userData.id),
-          dataService.getUserOrders(userData.id),
-        ])
-
-        setGigs(userGigs)
-        setOrders(userOrders)
-      }
+      setGigs(userGigs)
+      setOrders(userOrders)
     } catch (error) {
       console.error("Error fetching dashboard data:", error)
     } finally {
@@ -51,19 +57,23 @@ export default function DashboardPage() {
     avgRating: gigs.length > 0 ? gigs.reduce((sum, gig) => sum + gig.rating, 0) / gigs.length : 0,
   }
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-1/4" />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
+              <Skeleton key={i} className="h-32" />
             ))}
           </div>
         </div>
       </div>
     )
+  }
+
+  if (!user) {
+    return null
   }
 
   return (
@@ -153,15 +163,7 @@ export default function DashboardPage() {
                     <div key={gig.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center space-x-4">
                         <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                          {gig.images?.[0] ? (
-                            <img
-                              src={gig.images[0] || "/placeholder.svg"}
-                              alt={gig.title}
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                          ) : (
-                            <Eye className="h-6 w-6 text-gray-400" />
-                          )}
+                          <Eye className="h-6 w-6 text-gray-400" />
                         </div>
                         <div>
                           <h3 className="font-semibold">{gig.title}</h3>
@@ -223,9 +225,9 @@ export default function DashboardPage() {
                           variant={
                             order.status === "completed"
                               ? "default"
-                              : order.status === "active"
+                              : order.status === "in_progress"
                                 ? "secondary"
-                                : order.status === "delivered"
+                                : order.status === "pending"
                                   ? "outline"
                                   : "destructive"
                           }
