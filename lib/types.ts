@@ -12,6 +12,7 @@ export interface User {
   is_verified: boolean
   reputation_score: number
   total_earnings: number
+  wallet_balance?: number
   created_at: string
   updated_at: string
 }
@@ -23,6 +24,8 @@ export interface Category {
   color: string
   icon?: string
   created_at: string
+  trending?: boolean
+  gigCount?: number
 }
 
 export interface Gig {

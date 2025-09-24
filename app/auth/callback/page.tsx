@@ -14,31 +14,104 @@ export default function AuthCallbackPage() {
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
   const [message, setMessage] = useState("")
+  const [userEmail, setUserEmail] = useState<string | null>(null)
 
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        const { data, error } = await supabase.auth.getSession()
+        console.log('Starting auth callback process...')
+        
+        // Get URL fragments and search params
+        const urlParams = new URLSearchParams(window.location.search)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+        
+        // Check for error in URL
+        const error = urlParams.get('error') || hashParams.get('error')
+        const errorDescription = urlParams.get('error_description') || hashParams.get('error_description')
         
         if (error) {
+          console.error('Auth error from URL:', error, errorDescription)
           setStatus("error")
-          setMessage("Authentication failed. Please try again.")
+          setMessage(errorDescription || "Authentication failed. Please try again.")
+          return
+        }
+        
+        // Handle the session exchange
+        const { data, error: sessionError } = await supabase.auth.getSession()
+        
+        if (sessionError) {
+          console.error('Session error:', sessionError)
+          setStatus("error")
+          setMessage(`Authentication failed: ${sessionError.message}`)
           return
         }
 
-        if (data.session) {
+        if (data.session?.user) {
+          console.log('User authenticated successfully:', data.session.user.email)
+          setUserEmail(data.session.user.email || null)
+          
+          // Check if user exists in our database
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', data.session.user.id)
+            .single()
+          
+          if (userError && userError.code !== 'PGRST116') {
+            console.error('User lookup error:', userError)
+          }
+          
+          // If user doesn't exist in our users table, create them
+          if (!userData) {
+            const { error: insertError } = await supabase
+              .from('users')
+              .insert({
+                id: data.session.user.id,
+                email: data.session.user.email,
+                full_name: data.session.user.user_metadata?.full_name || '',
+                college: data.session.user.user_metadata?.college || '',
+                is_verified: true,
+                reputation_score: 100,
+                total_earnings: 0,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              })
+              
+            if (insertError) {
+              console.error('Error creating user record:', insertError)
+            }
+          }
+          
           setStatus("success")
-          setMessage("Email confirmed successfully! You can now sign in to your account.")
+          setMessage("Email confirmed successfully! Welcome to Student Marketplace.")
           
           // Redirect to dashboard after 3 seconds
           setTimeout(() => {
             router.push("/dashboard")
           }, 3000)
+          
         } else {
-          setStatus("error")
-          setMessage("Email confirmation failed. Please try signing up again.")
+          console.log('No session found, retrying...')
+          // Retry after a short delay
+          setTimeout(async () => {
+            const { data: retryData, error: retryError } = await supabase.auth.getSession()
+            
+            if (retryData.session?.user) {
+              setUserEmail(retryData.session.user.email || null)
+              setStatus("success")
+              setMessage("Email confirmed successfully! Welcome to Student Marketplace.")
+              setTimeout(() => {
+                router.push("/dashboard")
+              }, 2000)
+            } else {
+              console.error('Retry failed:', retryError)
+              setStatus("error")
+              setMessage("Email confirmation failed. The link may have expired or already been used.")
+            }
+          }, 2000)
         }
       } catch (err) {
+        console.error('Unexpected error in auth callback:', err)
         setStatus("error")
         setMessage("An unexpected error occurred. Please try again.")
       }
@@ -81,7 +154,14 @@ export default function AuthCallbackPage() {
           <CardTitle className={status === "success" ? "text-green-600" : "text-red-600"}>
             {status === "success" ? "Email Confirmed!" : "Confirmation Failed"}
           </CardTitle>
-          <CardDescription>{message}</CardDescription>
+          <CardDescription>
+            {userEmail && (
+              <span className="text-sm text-muted-foreground block mb-2">
+                Account: {userEmail}
+              </span>
+            )}
+            {message}
+          </CardDescription>
         </CardHeader>
         <CardContent className="text-center space-y-4">
           {status === "success" ? (

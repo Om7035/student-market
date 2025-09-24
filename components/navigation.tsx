@@ -18,6 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Search, Bell, MessageCircle, User, Settings, LogOut, Plus, MapPin, Target } from "lucide-react"
 import { dataService } from "@/lib/data-service"
+import { supabase } from "@/lib/supabase"
 import type { User as UserType } from "@/lib/types"
 import { ThemeToggle } from "@/components/theme-toggle"
 

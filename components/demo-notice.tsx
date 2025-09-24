@@ -10,7 +10,7 @@ export function DemoNotice() {
 
   useEffect(() => {
     // Check if Supabase is configured
-    const isSupabaseConfigured = !!(process.env.NEXT_PUBLIC_SUPABASE && process.env.NEXT_PUBLIC_SUPABASE_ANON)
+    const isSupabaseConfigured = !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
     if (!isSupabaseConfigured) {
       setIsVisible(true)
