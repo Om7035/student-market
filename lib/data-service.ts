@@ -1,10 +1,11 @@
 import { supabase } from "./supabase"
 import { mockCategories, mockGigs, mockOrders, mockUsers, mockReviews } from "./mock-data"
+import { getRedirectUrl } from "./environment"
 import type { User, Gig, Category, Order, Review } from "./types"
 
 // Check if Supabase is properly configured
 const isSupabaseConfigured = () => {
-  return !!(process.env.NEXT_PUBLIC_SUPABASE && process.env.NEXT_PUBLIC_SUPABASE_ANON)
+  return !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 }
 
 export const dataService = {
@@ -293,7 +294,18 @@ export const dataService = {
       throw new Error("Supabase not configured. Please set up your environment variables.")
     }
 
-    return await supabase.auth.signInWithPassword({ email, password })
+    try {
+      console.log('Attempting signin with Supabase...')
+      const result = await supabase.auth.signInWithPassword({ email, password })
+      console.log('Signin result:', result.error ? 'Error' : 'Success')
+      if (result.error) {
+        console.error('Signin error:', result.error)
+      }
+      return result
+    } catch (error) {
+      console.error('Signin network error:', error)
+      throw error
+    }
   },
 
   async signUp(email: string, password: string, userData: { full_name: string; college: string }) {
@@ -301,14 +313,25 @@ export const dataService = {
       throw new Error("Supabase not configured. Please set up your environment variables.")
     }
 
-    return await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: userData,
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
+    try {
+      console.log('Attempting signup with Supabase...')
+      const result = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: userData,
+          emailRedirectTo: getRedirectUrl('/auth/callback'),
+        },
+      })
+      console.log('Signup result:', result.error ? 'Error' : 'Success')
+      if (result.error) {
+        console.error('Signup error:', result.error)
+      }
+      return result
+    } catch (error) {
+      console.error('Signup network error:', error)
+      throw error
+    }
   },
 
   async resendConfirmationEmail(email: string) {
@@ -320,7 +343,7 @@ export const dataService = {
       type: 'signup',
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: getRedirectUrl('/auth/callback'),
       },
     })
   },

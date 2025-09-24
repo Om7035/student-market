@@ -94,8 +94,8 @@ Welcome to Student Market, a comprehensive marketplace designed to connect stude
 4.  **Configure Environment Variables:**
     Create a `.env.local` file in the root of your project and add your Supabase credentials:
     \`\`\`
-    NEXT_PUBLIC_SUPABASE="YOUR_SUPABASE_URL"
-    NEXT_PUBLIC_SUPABASE_ANON="YOUR_SUPABASE_ANON_KEY"
+    NEXT_PUBLIC_SUPABASE_URL="YOUR_SUPABASE_URL"
+    NEXT_PUBLIC_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"
     SUPABASE_SERVICE_ROLE_KEY="YOUR_SUPABASE_SERVICE_ROLE_KEY" # For server-side operations if needed
     \`\`\`
 
