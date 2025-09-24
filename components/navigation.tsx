@@ -260,6 +260,7 @@ export function Navigation() {
                   </Button>
                 </div>
               )}
+            </div>
           </div>
         </div>
       </nav>
