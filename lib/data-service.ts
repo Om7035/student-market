@@ -1,6 +1,6 @@
-import { supabase } from "./supabase"
 import { mockCategories, mockGigs, mockOrders, mockUsers, mockReviews } from "./mock-data"
 import { getRedirectUrl } from "./environment"
+import { supabase } from "./supabase"
 import type { User, Gig, Category, Order, Review } from "./types"
 
 // Check if Supabase is properly configured

@@ -85,10 +85,10 @@ export default function AuthCallbackPage() {
           setStatus("success")
           setMessage("Email confirmed successfully! Welcome to Student Marketplace.")
           
-          // Redirect to dashboard after 3 seconds
+          // Redirect to dashboard after 2 seconds
           setTimeout(() => {
-            router.push("/dashboard")
-          }, 3000)
+            window.location.href = "/dashboard"
+          }, 2000)
           
         } else {
           console.log('No session found, retrying...')
@@ -101,8 +101,8 @@ export default function AuthCallbackPage() {
               setStatus("success")
               setMessage("Email confirmed successfully! Welcome to Student Marketplace.")
               setTimeout(() => {
-                router.push("/dashboard")
-              }, 2000)
+                window.location.href = "/dashboard"
+              }, 1500)
             } else {
               console.error('Retry failed:', retryError)
               setStatus("error")
