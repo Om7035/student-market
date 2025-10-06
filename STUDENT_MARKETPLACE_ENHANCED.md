@@ -1,5 +1,12 @@
 # 🎓 Student Marketplace - Enhanced Project Documentation
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15.5.4-black?style=for-the-badge&logo=next.js" />
+  <img src="https://img.shields.io/badge/TypeScript-Ready-blue?style=for-the-badge&logo=typescript" />
+  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase" />
+  <img src="https://img.shields.io/badge/Razorpay-Payments-orange?style=for-the-badge&logo=razorpay" />
+</p>
+
 ## 📋 Table of Contents
 - [Project Overview](#project-overview)
 - [Technology Stack](#technology-stack)
@@ -22,6 +29,12 @@
 - **💰 Monetization**: Students can earn through services and jobs
 - **🤝 Peer Network**: Connect with fellow students from local universities
 - **🚀 Skill Development**: Opportunities to enhance technical and soft skills
+
+### 🎯 Project Goals
+- **Inclusive Access**: Democratize access to academic services
+- **Local Community**: Foster collaboration within Pune's student community
+- **Professional Growth**: Bridge gap between academics and industry
+- **Economic Empowerment**: Enable students to monetize their skills
 
 ---
 
@@ -50,6 +63,12 @@
 - **Zod**: Schema validation
 - **PostCSS & Autoprefixer**: CSS processing
 - **Recharts**: Data visualization
+
+### 🛡️ Security Measures
+- **JWT Authentication**: Secure user sessions
+- **Role-based Access**: Granular permission control
+- **Data Encryption**: At-rest and in-transit protection
+- **Input Sanitization**: Protection against injection attacks
 
 ---
 
@@ -98,90 +117,6 @@ graph TD
     end
 ```
 
-### Use Case Diagram
-
-```mermaid
-pie
-    title User Roles Distribution
-    "Students" : 60
-    "Clients" : 30
-    "Faculty" : 10
-```
-
-```mermaid
-graph LR
-    A[User] --> B[Browse Services]
-    A --> C[Post Jobs]
-    A --> D[Chat with Peers]
-    A --> E[Make Payments]
-    A --> F[Review Services]
-    A --> G[Manage Profile]
-    
-    style A fill:#4f46e5,stroke:#000,color:white
-    style B fill:#10b981,stroke:#000,color:white
-    style C fill:#f97316,stroke:#000,color:white
-    style D fill:#0ea5e9,stroke:#000,color:white
-    style E fill:#8b5cf6,stroke:#000,color:white
-    style F fill:#ec4899,stroke:#000,color:white
-    style G fill:#14b8a6,stroke:#000,color:white
-```
-
-```mermaid
-graph TD
-    subgraph Actors
-        Student[Student/Freelancer]
-        Client[Client/Employer]
-        Faculty[Placement Officer]
-    end
-    
-    subgraph UseCases
-        Browse[Browse Services]
-        Create[Create Gigs]
-        Apply[Apply for Jobs]
-        Post[Post Job Listings]
-        Hire[Hire Students]
-        Chat[Real-time Chat]
-        Pay[Make Payments]
-        Review[Review Services]
-        Track[Track Performance]
-        Manage[Manage Dashboard]
-    end
-    
-    Student --> Browse
-    Student --> Create
-    Student --> Apply
-    Student --> Chat
-    Student --> Pay
-    Student --> Review
-    Student --> Manage
-    
-    Client --> Browse
-    Client --> Post
-    Client --> Hire
-    Client --> Chat
-    Client --> Pay
-    Client --> Review
-    Client --> Manage
-    
-    Faculty --> Track
-    Faculty --> Manage
-    Faculty --> Review
-    
-    style Student fill:#4f46e5,stroke:#000,color:white
-    style Client fill:#f97316,stroke:#000,color:white
-    style Faculty fill:#10b981,stroke:#000,color:white
-    style Browse fill:#0ea5e9,stroke:#000,color:white
-    style Create fill:#8b5cf6,stroke:#000,color:white
-    style Apply fill:#ec4899,stroke:#000,color:white
-    style Post fill:#14b8a6,stroke:#000,color:white
-    style Hire fill:#f59e0b,stroke:#000,color:white
-    style Chat fill:#ef4444,stroke:#000,color:white
-    style Pay fill:#6366f1,stroke:#000,color:white
-    style Review fill:#8b5cf6,stroke:#000,color:white
-    style Track fill:#10b981,stroke:#000,color:white
-    style Manage fill:#f97316,stroke:#000,color:white
-```
-
 ---
 
 ## 🚀 Core Features
@@ -204,6 +139,18 @@ The platform supports three distinct user personas:
    - Track student performance
    - Monitor platform engagement
    - Facilitate student opportunities
+
+### 🎯 Core Functionality Matrix
+
+| Feature | Students | Clients | Faculty |
+|---------|----------|---------|---------|
+| **Service Creation** | ✅ | ❌ | ❌ |
+| **Job Posting** | ❌ | ✅ | ❌ |
+| **Application System** | ✅ | ✅ | ❌ |
+| **Real-time Chat** | ✅ | ✅ | ✅ |
+| **Payment Processing** | ✅ | ✅ | ❌ |
+| **Performance Tracking** | ✅ | ✅ | ✅ |
+| **Admin Dashboard** | ❌ | ❌ | ✅ |
 
 ### 🛍️ Service Marketplace
 
@@ -305,11 +252,13 @@ The Supabase PostgreSQL database contains these key tables:
 4. **Access Application**
    Open [http://localhost:3000](http://localhost:3000)
 
-### 🧪 Testing
+### 🧪 Testing Strategy
 
-- **Unit Tests**: Component and function testing
+- **Unit Tests**: Component and function testing with Jest
 - **Integration Tests**: API and database interactions
-- **E2E Tests**: User flow validation
+- **E2E Tests**: User flow validation with Cypress
+- **Accessibility Testing**: WCAG compliance verification
+- **Performance Testing**: Load and stress testing
 
 ### 📦 Build Process
 
@@ -317,6 +266,14 @@ The Supabase PostgreSQL database contains these key tables:
 npm run build
 npm run start
 ```
+
+### 🔄 CI/CD Pipeline
+
+1. **Code Push**: Commit to GitHub repository
+2. **Automated Testing**: Run test suite on PR
+3. **Code Quality**: ESLint and Prettier checks
+4. **Deployment**: Vercel auto-deployment
+5. **Monitoring**: Error tracking and performance metrics
 
 ---
 
@@ -397,6 +354,21 @@ The architecture combines:
 
 With its modular structure and well-defined data models, the platform can be easily extended with additional features while maintaining code quality and performance standards.
 
+### 🚀 Future Enhancements
+
+1. **Mobile Application**: Native iOS/Android app development
+2. **AI Matching**: Intelligent service and job recommendations
+3. **Learning Paths**: Structured skill development programs
+4. **Community Features**: Forums and knowledge sharing
+5. **Analytics Dashboard**: Advanced insights and reporting
+
 ---
 
-*Built with ❤️ for students by students*
+<p align="center">
+  <strong>Built with ❤️ for students by students</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Made%20with-Next.js-black?style=for-the-badge&logo=next.js" />
+  <img src="https://img.shields.io/badge/Powered%20by-Supabase-3ECF8E?style=for-the-badge&logo=supabase" />
+</p>
