@@ -101,7 +101,7 @@ graph TD
 ### Use Case Diagram
 
 ```mermaid
-piechart
+pie
     title User Roles Distribution
     "Students" : 60
     "Clients" : 30
