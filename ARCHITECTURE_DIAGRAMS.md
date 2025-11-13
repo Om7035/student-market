@@ -5,68 +5,108 @@ Student Market is a full-stack web application built with Next.js 15, React 19, 
 
 ---
 
-## 🎯 Activity Diagram - User Journey Flow
+## 📊 Activity Diagram - User Journey Flow
 
 ```mermaid
-activityDiagram
-    title Student Market - User Activity Flow
+flowchart TD
+    Start([Start]) --> Visit[User Visits Platform]
     
-    start
-    :User Visits Platform;
+    subgraph Authentication [Authentication Module]
+        Browse[Browse Services as Guest]
+        Auth[User Authentication via Supabase]
+    end
     
-    partition Authentication {
-        :Browse Services (Guest);
-        --> Sign Up/Sign In;
-        :User Authentication;
-        note right: Supabase Auth
-    }
+    Visit --> Browse
+    Browse --> Auth
     
-    partition Role Selection {
-        :Select Role (Student/Client/Officer);
-        --> Complete Onboarding;
-        :Profile Setup;
-        note right: Profile data stored in Supabase
-    }
+    subgraph RoleSelection [Role Selection Module]
+        SelectRole[Select Role]
+        Onboarding[Complete Onboarding]
+        Profile[Profile Setup]
+    end
     
-    partition Main Flow {
-        if (Role is Student?) then (yes)
-            :Create Gig/Service;
-            note right: 4-step wizard process
-            --> Set Pricing & Delivery;
-            --> Upload Media;
-            --> Publish Service;
-            --> Manage Bids;
-            --> Communicate with Clients;
-            --> Deliver Work;
-            --> Receive Payment;
-        else (no)
-            if (Role is Client?) then (yes)
-                :Browse/Search Services;
-                --> Filter by Category/Price;
-                --> View Service Details;
-                --> Place Order/Submit Bid;
-                --> Make Payment (Escrow);
-                --> Communicate with Student;
-                --> Receive Delivery;
-                --> Review & Rate Service;
-            else (no)
-                :Access Analytics Dashboard;
-                --> Monitor Platform Metrics;
-                --> Manage Users;
-                --> View Reports;
-            endif
-        endif
-    }
+    Auth --> SelectRole
+    SelectRole --> Onboarding
+    Onboarding --> Profile
     
-    partition Common Features {
-        :Real-time Messaging;
-        :Notifications Management;
-        :Profile Management;
-        :Wallet & Payment History;
-        :Reviews & Ratings;
-    }
+    subgraph StudentFlow [Student Workflow]
+        CreateGig[Create Gig/Service]
+        SetPricing[Set Pricing & Delivery]
+        UploadMedia[Upload Media]
+        Publish[Publish Service]
+        ManageBids[Manage Bids]
+        Communicate1[Communicate with Clients]
+        Deliver[Deliver Work]
+        ReceivePayment[Receive Payment]
+    end
     
-    stop
+    subgraph ClientFlow [Client Workflow]
+        BrowseServices[Browse/Search Services]
+        Filter[Filter by Category/Price]
+        ViewDetails[View Service Details]
+        PlaceOrder[Place Order/Submit Bid]
+        MakePayment[Make Payment via Razorpay]
+        Communicate2[Communicate with Student]
+        ReceiveDelivery[Receive Delivery]
+        Review[Review & Rate Service]
+    end
+    
+    subgraph OfficerFlow [Officer Workflow]
+        Dashboard[Access Analytics Dashboard]
+        Monitor[Monitor Platform Metrics]
+        ManageUsers[Manage Users]
+        Reports[View Reports]
+    end
+    
+    Profile --> StudentFlow
+    Profile --> ClientFlow
+    Profile --> OfficerFlow
+    
+    CreateGig --> SetPricing
+    SetPricing --> UploadMedia
+    UploadMedia --> Publish
+    Publish --> ManageBids
+    ManageBids --> Communicate1
+    Communicate1 --> Deliver
+    Deliver --> ReceivePayment
+    
+    BrowseServices --> Filter
+    Filter --> ViewDetails
+    ViewDetails --> PlaceOrder
+    PlaceOrder --> MakePayment
+    MakePayment --> Communicate2
+    Communicate2 --> ReceiveDelivery
+    ReceiveDelivery --> Review
+    
+    Dashboard --> Monitor
+    Monitor --> ManageUsers
+    ManageUsers --> Reports
+    
+    subgraph CommonFeatures [Common Features]
+        Messaging[Real-time Messaging]
+        Notifications[Notifications Management]
+        ProfileMgmt[Profile Management]
+        Wallet[Wallet & Payment History]
+        Ratings[Reviews & Ratings]
+    end
+    
+    StudentFlow --> CommonFeatures
+    ClientFlow --> CommonFeatures
+    OfficerFlow --> CommonFeatures
+    
+    CommonFeatures --> End([End])
+    
+    classDef authBox fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef studentBox fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef clientBox fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef officerBox fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef commonBox fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    
+    class Browse,Auth authBox
+    class CreateGig,SetPricing,UploadMedia,Publish,ManageBids,Communicate1,Deliver,ReceivePayment studentBox
+    class BrowseServices,Filter,ViewDetails,PlaceOrder,MakePayment,Communicate2,ReceiveDelivery,Review clientBox
+    class Dashboard,Monitor,ManageUsers,Reports officerBox
+    class Messaging,Notifications,ProfileMgmt,Wallet,Ratings commonBox
 ```
 
 ---
@@ -75,71 +115,38 @@ activityDiagram
 
 ```mermaid
 sequenceDiagram
-    title Service Creation to Order Completion Sequence
+    participant User
+    participant Frontend as Next.js Frontend
+    participant API as API Routes
+    participant Supabase as Supabase Backend
+    participant Razorpay as Razorpay Gateway
     
-    participant U as User (Student)
-    participant F as Frontend (Next.js)
-    participant A as API Routes
-    participant S as Supabase Backend
-    participant P as Payment Gateway
-    participant N as Notification System
+    User->>Frontend: Create Service Request
+    Frontend->>API: POST /api/services
+    API->>Supabase: Validate & Store Service
+    Supabase-->>API: Service Created
+    API-->>Frontend: Service ID Response
+    Frontend-->>User: Service Published
     
-    Note over U,N: Service Creation Flow
-    U->>F: Click "Create Gig"
-    F->>A: GET /api/categories
-    A->>S: Fetch categories
-    S-->>A: Categories data
-    A-->>F: Categories response
-    F-->>U: Show category selection
+    User->>Frontend: Browse Services
+    Frontend->>API: GET /api/services
+    API->>Supabase: Query Services
+    Supabase-->>API: Service List
+    API-->>Frontend: Filtered Services
+    Frontend-->>User: Display Services
     
-    U->>F: Fill gig details (4 steps)
-    U->>F: Submit gig creation
-    F->>A: POST /api/services
-    A->>S: Validate & Insert gig
-    S-->>A: Gig created
-    A-->>F: Success response
-    F-->>U: Gig published confirmation
-    
-    Note over U,N: Order Flow
-    participant C as Client
-    C->>F: Browse services
-    F->>A: GET /api/services?filters
-    A->>S: Query gigs with filters
-    S-->>A: Filtered gigs
-    A-->>F: Services list
-    F-->>C: Display services
-    
-    C->>F: Select service & order
-    F->>A: POST /api/orders
-    A->>S: Create order record
-    S-->>A: Order created
-    A->>P: Initiate payment
-    P-->>A: Payment success
-    A->>S: Update order status
-    S-->>A: Order confirmed
-    A->>N: Send notifications
-    N-->>U: New order notification
-    A-->>F: Order confirmation
-    F-->>C: Payment success
-    
-    Note over U,N: Communication & Delivery
-    U->>F: Send message
-    F->>A: POST /api/messages
-    A->>S: Store message
-    S-->>A: Message saved
-    A->>N: Real-time notification
-    N-->>C: New message alert
-    
-    U->>F: Mark order delivered
-    F->>A: PUT /api/orders/[id]/status
-    A->>S: Update order status
-    S-->>A: Status updated
-    A->>P: Release escrow payment
-    P-->>A: Payment released
-    A->>S: Update wallet balance
-    S-->>A: Balance updated
-    A-->>F: Delivery confirmed
-    F-->>U: Payment received
+    User->>Frontend: Place Order
+    Frontend->>API: POST /api/orders
+    API->>Supabase: Create Order
+    Supabase-->>API: Order Created
+    API-->>Frontend: Order ID
+    Frontend->>Razorpay: Initiate Payment
+    Razorpay-->>Frontend: Payment Success
+    Frontend->>API: Update Payment Status
+    API->>Supabase: Mark Order Paid
+    Supabase-->>API: Confirmation
+    API-->>Frontend: Order Confirmed
+    Frontend-->>User: Order Success
 ```
 
 ---
@@ -148,246 +155,95 @@ sequenceDiagram
 
 ```mermaid
 classDiagram
-    title Student Market - Class Architecture
-    
-    namespace Frontend.Components {
-        class Navigation {
-            +user: User
-            +searchQuery: string
-            +unreadCount: number
-            +handleSignOut()
-            +handleSearch()
-            +fetchUserProfile()
-        }
-        
-        class GigCard {
-            +gig: Gig
-            +onViewDetails()
-            +onContactSeller()
-            +renderRating()
-        }
-        
-        class ChatbotWidget {
-            +position: string
-            +isOpen: boolean
-            +toggleChat()
-            +sendMessage()
-            +handleResponse()
-        }
-        
-        class MobileNav {
-            +user: User
-            +unreadCount: number
-            +renderNavItems()
-        }
+    class User {
+        +id: string
+        +email: string
+        +name: string
+        +role: Role
+        +profile: UserProfile
+        +wallet: Wallet
+        +signIn()
+        +signOut()
+        +updateProfile()
     }
     
-    namespace Frontend.Pages {
-        class HomePage {
-            +categories: Category[]
-            +featuredGigs: Gig[]
-            +testimonials: Testimonial[]
-            +renderHeroSection()
-            +renderCategories()
-            +renderFeaturedServices()
-        }
-        
-        class GigsPage {
-            +gigs: Gig[]
-            +filters: GigFilters
-            +loading: boolean
-            +fetchGigs()
-            +handleSearch()
-            +applyFilters()
-        }
-        
-        class DashboardPage {
-            +user: User
-            +myGigs: Gig[]
-            +orders: Order[]
-            +analytics: Analytics
-            +loadDashboard()
-            +createNewGig()
-            +manageOrders()
-        }
+    class Service {
+        +id: string
+        +title: string
+        +description: string
+        +price: number
+        +category: Category
+        +studentId: string
+        +media: Media[]
+        +status: ServiceStatus
+        +create()
+        +update()
+        +delete()
     }
     
-    namespace API.Routes {
-        class ServicesAPI {
-            +GET(req: Request)
-            +POST(req: Request)
-            +validateServiceData()
-            +handleFilters()
-        }
-        
-        class OrdersAPI {
-            +GET(req: Request)
-            +POST(req: Request)
-            +PUT(req: Request)
-            +updateOrderStatus()
-            +processPayment()
-        }
-        
-        class MessagesAPI {
-            +GET(req: Request)
-            +POST(req: Request)
-            +markAsRead()
-            +getConversation()
-        }
-        
-        class PaymentsAPI {
-            +createPayment()
-            +handleWebhook()
-            +verifyPayment()
-            +releaseEscrow()
-        }
+    class Order {
+        +id: string
+        +serviceId: string
+        +clientId: string
+        +amount: number
+        +status: OrderStatus
+        +payment: Payment
+        +create()
+        +updateStatus()
+        +complete()
     }
     
-    namespace Database.Models {
-        class User {
-            +id: UUID
-            +email: string
-            +full_name: string
-            +avatar_url: string
-            +college: string
-            +major: string
-            +year: number
-            +bio: string
-            +skills: string[]
-            +reputation_score: number
-            +wallet_balance: number
-            +is_verified: boolean
-            +role: UserRole
-            +onboarding_completed: boolean
-            +created_at: Timestamp
-            +updated_at: Timestamp
-        }
-        
-        class Gig {
-            +id: UUID
-            +user_id: UUID
-            +title: string
-            +description: string
-            +category_id: UUID
-            +price: number
-            +delivery_days: number
-            +tags: string[]
-            +images: string[]
-            +video_url: string
-            +is_active: boolean
-            +rating: number
-            +total_orders: number
-            +created_at: Timestamp
-            +updated_at: Timestamp
-        }
-        
-        class Order {
-            +id: UUID
-            +gig_id: UUID
-            +buyer_id: UUID
-            +seller_id: UUID
-            +status: OrderStatus
-            +amount: number
-            +requirements: string
-            +delivery_date: Timestamp
-            +completed_at: Timestamp
-            +created_at: Timestamp
-        }
-        
-        class Message {
-            +id: UUID
-            +sender_id: UUID
-            +receiver_id: UUID
-            +order_id: UUID
-            +content: string
-            +attachments: string[]
-            +is_read: boolean
-            +created_at: Timestamp
-        }
-        
-        class Review {
-            +id: UUID
-            +order_id: UUID
-            +reviewer_id: UUID
-            +rating: number
-            +comment: string
-            +created_at: Timestamp
-        }
-        
-        class Category {
-            +id: UUID
-            +name: string
-            +description: string
-            +icon: string
-            +color: string
-            +created_at: Timestamp
-        }
+    class Payment {
+        +id: string
+        +orderId: string
+        +amount: number
+        +razorpayId: string
+        +status: PaymentStatus
+        +process()
+        +refund()
     }
     
-    namespace Services {
-        class DataService {
-            +getCurrentUser()
-            +getGigs(filters)
-            +createGig(data)
-            +createOrder(data)
-            +sendMessage(data)
-            +getMessages(userId)
-            +updateProfile(data)
-            +processPayment(data)
-        }
-        
-        class SupabaseClient {
-            +auth: Auth
-            +from(table): QueryBuilder
-            +storage: Storage
-            +realtime: RealtimeClient
-            +functions: Functions
-        }
-        
-        class PaymentService {
-            +createOrder(amount, currency)
-            +verifyPayment(paymentId)
-            +releaseEscrow(orderId)
-            +refundPayment(orderId)
-        }
-        
-        class NotificationService {
-            +sendPushNotification(userId, message)
-            +sendEmailNotification(userEmail, template)
-            +subscribeToRealtimeUpdates(userId)
-            +markAsRead(notificationId)
-        }
+    class Message {
+        +id: string
+        +senderId: string
+        +receiverId: string
+        +content: string
+        +timestamp: Date
+        +send()
+        +markAsRead()
     }
     
-    %% Relationships
-    User ||--o{ Gig : creates
-    User ||--o{ Order : places/buys
-    User ||--o{ Message : sends
-    User ||--o{ Review : writes
-    Gig ||--o{ Order : generates
-    Order ||--|| Message : contains
-    Order ||--|| Review : receives
-    Gig }|--|| Category : belongs_to
+    class Review {
+        +id: string
+        +orderId: string
+        +rating: number
+        +comment: string
+        +reviewerId: string
+        +submit()
+        +update()
+    }
     
-    Navigation --> User : uses
-    GigCard --> Gig : displays
-    HomePage --> GigCard : renders
-    GigsPage --> GigCard : renders
-    DashboardPage --> User : manages
+    User "1" --> "*" Service : creates
+    User "1" --> "*" Order : places
+    User "1" --> "*" Message : sends
+    User "1" --> "*" Review : writes
+    Service "1" --> "*" Order : generates
+    Order "1" --> "1" Payment : has
+    Order "1" --> "1" Review : receives
     
-    ServicesAPI --> DataService : calls
-    OrdersAPI --> DataService : calls
-    MessagesAPI --> DataService : calls
-    PaymentsAPI --> PaymentService : uses
+    class Category {
+        +id: string
+        +name: string
+        +description: string
+    }
     
-    DataService --> SupabaseClient : queries
-    DataService --> PaymentService : processes
-    DataService --> NotificationService : notifies
+    Service --> Category : belongs to
     
-    User "1" -- "*" Gig : creates
-    User "1" -- "*" Order : participates
-    Gig "1" -- "*" Order : generates
-    Order "1" -- "*" Message : contains
+    class Notification {
+        +id: string
+    }
+    
+    User "1" --> "*" Notification : receives
 ```
 
 ---
@@ -396,69 +252,54 @@ classDiagram
 
 ```mermaid
 graph TB
-    subgraph "Frontend Layer (Next.js)"
-        A[App Router] --> B[Layout.tsx]
-        B --> C[Navigation Component]
-        B --> D[MobileNav Component]
-        B --> E[ChatbotWidget]
+    subgraph Frontend [Frontend Layer - Next.js]
+        App[App Router]
+        Layout[Layout Component]
+        Pages[Page Components]
+        Components[UI Components]
+        Hooks[Custom Hooks]
+        Utils[Utilities]
         
-        F[Pages] --> G[HomePage]
-        F --> H[GigsPage]
-        F --> I[DashboardPage]
-        F --> J[MessagesPage]
-        F --> K[ProfilePage]
+        App --> Layout
+        Layout --> Pages
+        Pages --> Components
+        Components --> Hooks
+        Hooks --> Utils
+    end
+    
+    subgraph Backend [Backend Layer - Supabase]
+        Auth[Authentication]
+        DB[PostgreSQL Database]
+        Storage[File Storage]
+        Realtime[Real-time Engine]
+        Functions[Edge Functions]
         
-        L[UI Components] --> M[shadcn/ui Components]
-        L --> N[Custom Components]
-        N --> O[GigCard]
-        N --> P[CategoryCard]
-        N --> Q[ReviewCard]
+        Auth --> DB
+        DB --> Storage
+        Storage --> Realtime
+        Realtime --> Functions
     end
     
-    subgraph "API Layer (Next.js API Routes)"
-        R[Services API] --> S[GET /api/services]
-        R --> T[POST /api/services]
-        U[Orders API] --> V[POST /api/orders]
-        U --> W[PUT /api/orders/:id]
-        X[Messages API] --> Y[GET /api/messages]
-        X --> Z[POST /api/messages]
-        AA[Payments API] --> BB[POST /api/payments]
-        AA --> CC[Webhook Handler]
+    subgraph External [External Services]
+        Razorpay[Payment Gateway]
+        Email[Email Service]
+        CDN[Content Delivery]
+        
+        Razorpay --> Functions
+        Email --> Functions
+        CDN --> Storage
     end
     
-    subgraph "Service Layer"
-        DD[DataService] --> EE[User Management]
-        DD --> FF[Gig Management]
-        DD --> GG[Order Processing]
-        DD --> HH[Messaging Service]
-        II[PaymentService] --> JJ[Razorpay Integration]
-        II --> KK[Escrow Management]
-        LL[NotificationService] --> MM[Real-time Updates]
-        LL --> NN[Email Notifications]
-    end
+    Frontend --> Backend
+    Backend --> External
     
-    subgraph "Backend Layer (Supabase)"
-        OO[PostgreSQL Database] --> PP[Users Table]
-        OO --> QQ[Gigs Table]
-        OO --> RR[Orders Table]
-        OO --> SS[Messages Table]
-        OO --> TT[Reviews Table]
-        UU[Authentication] --> VV[JWT Auth]
-        UU --> WW[Social Auth]
-        XX[Realtime Engine] --> YY[Live Messaging]
-        XX --> ZZ[Live Notifications]
-        AAA[Storage] --> BBB[File Uploads]
-        AAA --> CCC[Media Files]
-    end
+    classDef frontendBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef backendBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef externalBox fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
     
-    A --> R
-    F --> R
-    R --> DD
-    DD --> OO
-    DD --> UU
-    DD --> AAA
-    DD --> II
-    DD --> LL
+    class App,Layout,Pages,Components,Hooks,Utils frontendBox
+    class Auth,DB,Storage,Realtime,Functions backendBox
+    class Razorpay,Email,CDN externalBox
 ```
 
 ---
@@ -506,35 +347,40 @@ flowchart TD
 
 ```mermaid
 graph TB
-    subgraph "Deployment Environment"
-        A[Vercel Platform] --> B[Next.js Frontend]
-        A --> C[API Routes]
-        A --> D[Serverless Functions]
+    subgraph Production [Production Environment]
+        Vercel[Vercel Hosting]
+        Supabase[Supabase Cloud]
+        External[External Services]
         
-        E[Supabase Cloud] --> F[PostgreSQL Database]
-        E --> G[Authentication Service]
-        E --> H[Realtime Engine]
-        E --> I[Storage Service]
+        Vercel --> Frontend[Next.js App]
+        Vercel --> API[API Routes]
         
-        J[External Services] --> K[Razorpay Payment Gateway]
-        J --> L[Email Service]
-        J --> M[CDN for Assets]
+        Supabase --> Database[(PostgreSQL)]
+        Supabase --> Auth[Auth Service]
+        Supabase --> Storage[File Storage]
+        
+        External --> Razorpay[Payment Gateway]
+        External --> Email[Email Service]
     end
     
-    subgraph "Development Environment"
-        N[Local Development] --> O[Next.js Dev Server]
-        O --> P[Supabase Local]
-        P --> Q[Local Database]
+    subgraph Development [Development Environment]
+        Local[Local Dev]
+        DevServer[Next.js Dev Server]
+        LocalSupabase[Supabase Local]
+        
+        Local --> DevServer
+        DevServer --> LocalSupabase
     end
     
-    B --> E
-    C --> E
-    D --> J
-    E --> J
+    Frontend --> Database
+    API --> Database
+    API --> Razorpay
     
-    style A fill:#3b82f6,color:white
-    style E fill:#10b981,color:white
-    style J fill:#f59e0b,color:white
+    classDef prodBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef devBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    
+    class Vercel,Supabase,External,Frontend,API,Database,Auth,Storage,Razorpay,Email prodBox
+    class Local,DevServer,LocalSupabase devBox
 ```
 
 ---
@@ -543,21 +389,35 @@ graph TB
 
 ```mermaid
 graph LR
-    A[Mobile Device] --> B[Progressive Web App]
-    B --> C[Service Worker]
-    C --> D[Offline Support]
+    Mobile[Mobile Device] --> PWA[PWA Features]
     
-    B --> E[Responsive Layout]
-    E --> F[Mobile Navigation]
-    E --> G[Touch-Friendly UI]
+    subgraph PWA [Progressive Web App]
+        ServiceWorker[Service Worker]
+        Responsive[Responsive Design]
+        Offline[Offline Support]
+        Push[Push Notifications]
+    end
     
-    B --> H[Push Notifications]
-    H --> I[Real-time Alerts]
+    PWA --> UI[Mobile UI Components]
     
-    B --> J[Device Features]
-    J --> K[Camera Integration]
-    J --> L[Geolocation Services]
-    J --> M[File System Access]
+    subgraph UI [Mobile Interface]
+        Navigation[Mobile Navigation]
+        Touch[Touch-Friendly]
+        Gestures[Gesture Support]
+        Camera[Camera Integration]
+    end
+    
+    ServiceWorker --> Offline
+    Responsive --> Touch
+    Push --> Notifications
+    
+    classDef mobileBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef pwaBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef uiBox fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    
+    class Mobile mobileBox
+    class ServiceWorker,Responsive,Offline,Push pwaBox
+    class Navigation,Touch,Gestures,Camera uiBox
 ```
 
 ---
@@ -566,29 +426,36 @@ graph LR
 
 ```mermaid
 graph TB
-    A[Security Layer] --> B[Authentication]
-    A --> C[Authorization]
-    A --> D[Data Validation]
-    A --> E[Encryption]
+    Security[Security Layer] --> Auth[Authentication]
+    Security --> Authz[Authorization]
+    Security --> Validation[Data Validation]
+    Security --> Encryption[Encryption]
     
-    B --> F[Supabase Auth]
-    F --> G[JWT Tokens]
-    F --> H[Social Providers]
+    Auth --> SupabaseAuth[Supabase Auth]
+    SupabaseAuth --> JWT[JWT Tokens]
+    SupabaseAuth --> Social[Social Providers]
     
-    C --> I[Row Level Security]
-    I --> J[User-based Policies]
-    I --> K[Role-based Access]
+    Authz --> RLS[Row Level Security]
+    RLS --> UserPolicies[User Policies]
+    RLS --> RolePolicies[Role Policies]
     
-    D --> L[Zod Validation]
-    D --> M[Input Sanitization]
+    Validation --> Zod[Zod Validation]
+    Validation --> Sanitization[Input Sanitization]
     
-    E --> N[SSL/TLS]
-    E --> O[Data at Rest Encryption]
-    E --> P[Environment Variables]
+    Encryption --> SSL[SSL/TLS]
+    Encryption --> DataAtRest[Data at Rest]
+    Encryption --> EnvVars[Environment Variables]
     
-    Q[Payment Security] --> R[PCI Compliance]
-    Q --> S[Escrow Protection]
-    Q --> T[Fraud Detection]
+    PaymentSecurity[Payment Security] --> PCI[PCI Compliance]
+    PaymentSecurity --> Escrow[Escrow Protection]
+    
+    classDef securityBox fill:#ffebee,stroke:#c62828,stroke-width:2px
+    classDef authBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef dataBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    
+    class Security securityBox
+    class Auth,Authz,SupabaseAuth,JWT,Social,RLS,UserPolicies,RolePolicies authBox
+    class Validation,Encryption,Zod,Sanitization,SSL,DataAtRest,EnvVars,PaymentSecurity,PCI,Escrow dataBox
 ```
 
 ---
@@ -597,26 +464,33 @@ graph TB
 
 ```mermaid
 graph TB
-    A[Design System] --> B[Theme Provider]
-    A --> C[Component Library]
-    A --> D[Style Guidelines]
+    DesignSystem[Design System] --> Theme[Theme Provider]
+    DesignSystem --> Components[Component Library]
+    DesignSystem --> Guidelines[Style Guidelines]
     
-    B --> E[Dark/Light Mode]
-    B --> F[Color Palette]
-    B --> G[Typography]
+    Theme --> DarkMode[Dark/Light Mode]
+    Theme --> Colors[Color Palette]
+    Theme --> Typography[Typography System]
     
-    C --> H[shadcn/ui Components]
-    C --> I[Custom Components]
-    C --> J[Layout Components]
+    Components --> Shadcn[shadcn/ui]
+    Components --> Custom[Custom Components]
+    Components --> Layout[Layout Components]
     
-    D --> K[Responsive Design]
-    D --> L[Accessibility Standards]
-    D --> M[Animation Guidelines]
+    Guidelines --> Responsive[Responsive Design]
+    Guidelines --> Accessibility[Accessibility WCAG]
+    Guidelines --> Animations[Animation Guidelines]
     
-    N[User Experience] --> O[Progressive Enhancement]
-    N --> P[Loading States]
-    N --> Q[Error Handling]
-    N --> R[Feedback Systems]
+    UX[User Experience] --> Loading[Loading States]
+    UX --> Errors[Error Handling]
+    UX --> Feedback[Feedback Systems]
+    
+    classDef designBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef themeBox fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef uxBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    
+    class DesignSystem designBox
+    class Theme,DarkMode,Colors,Typography themeBox
+    class Components,Shadcn,Custom,Layout,Guidelines,Responsive,Accessibility,Animations,UX,Loading,Errors,Feedback uxBox
 ```
 
 ---
@@ -625,26 +499,36 @@ graph TB
 
 ```mermaid
 graph TB
-    A[Performance Optimization] --> B[Frontend Optimization]
-    A --> C[Backend Optimization]
-    A --> D[Database Optimization]
+    Performance[Performance Optimization] --> Frontend[Frontend Optimization]
+    Performance --> Backend[Backend Optimization]
+    Performance --> Database[Database Optimization]
     
-    B --> E[Code Splitting]
-    B --> F[Lazy Loading]
-    B --> G[Image Optimization]
-    B --> H[Caching Strategy]
+    Frontend --> CodeSplit[Code Splitting]
+    Frontend --> LazyLoad[Lazy Loading]
+    Frontend --> Images[Image Optimization]
+    Frontend --> Cache[Browser Caching]
     
-    C --> I[API Response Caching]
-    C --> J[Connection Pooling]
-    C --> K[Edge Functions]
+    Backend --> API[API Caching]
+    Backend --> Connection[Connection Pooling]
+    Backend --> Edge[Edge Functions]
     
-    D --> L[Query Optimization]
-    D --> M[Indexing Strategy]
-    D --> N[Connection Management]
+    Database --> Queries[Query Optimization]
+    Database --> Indexes[Database Indexing]
+    Database --> Connections[Connection Management]
     
-    O[Monitoring] --> P[Performance Metrics]
-    O --> Q[Error Tracking]
-    O --> R[User Analytics]
+    Monitoring[Performance Monitoring] --> Metrics[Core Web Vitals]
+    Monitoring --> Tracking[Error Tracking]
+    Monitoring --> Analytics[User Analytics]
+    
+    classDef perfBox fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef frontendBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef backendBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef monitorBox fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    
+    class Performance perfBox
+    class Frontend,CodeSplit,LazyLoad,Images,Cache frontendBox
+    class Backend,API,Connection,Edge,Database,Queries,Indexes,Connections backendBox
+    class Monitoring,Metrics,Tracking,Analytics monitorBox
 ```
 
 ---
@@ -653,26 +537,34 @@ graph TB
 
 ```mermaid
 graph TB
-    A[State Management] --> B[Client State]
-    A --> C[Server State]
-    A --> D[Global State]
+    State[State Management] --> Client[Client State]
+    State --> Server[Server State]
+    State --> Global[Global State]
     
-    B --> E[React useState]
-    B --> F[React useEffect]
-    B --> G[Local Component State]
+    Client --> Local[Component State]
+    Client --> Forms[Form State]
+    Client --> UI[UI State]
     
-    C --> H[Supabase Realtime]
-    C --> I[API Data Fetching]
-    C --> J[SWR/React Query Pattern]
+    Server --> Supabase[Supabase Client]
+    Server --> API[API State]
+    Server --> Cache[Query Cache]
     
-    D --> K[Context API]
-    D --> L[Auth Context]
-    D --> M[Theme Context]
-    D --> N[Notification Context]
+    Global --> Auth[Authentication]
+    Global --> User[User Profile]
+    Global --> Theme[Theme Settings]
     
-    O[State Synchronization] --> P[Real-time Subscriptions]
-    O --> Q[Optimistic Updates]
-    O --> R[Cache Invalidation]
+    Realtime[Real-time Updates] --> Subscriptions[WebSocket Subscriptions]
+    Realtime --> Sync[State Synchronization]
+    
+    classDef stateBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef clientBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef serverBox fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef realtimeBox fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    
+    class State stateBox
+    class Client,Local,Forms,UI clientBox
+    class Server,Supabase,API,Cache serverBox
+    class Global,Auth,User,Theme,Realtime,Subscriptions,Sync realtimeBox
 ```
 
 ---
