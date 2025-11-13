@@ -1,12 +1,5 @@
 # 🎓 Student Marketplace - Enhanced Project Documentation
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Next.js-15.5.4-black?style=for-the-badge&logo=next.js" />
-  <img src="https://img.shields.io/badge/TypeScript-Ready-blue?style=for-the-badge&logo=typescript" />
-  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase" />
-  <img src="https://img.shields.io/badge/Razorpay-Payments-orange?style=for-the-badge&logo=razorpay" />
-</p>
-
 ## 📋 Table of Contents
 - [Project Overview](#project-overview)
 - [Technology Stack](#technology-stack)
@@ -29,12 +22,6 @@
 - **💰 Monetization**: Students can earn through services and jobs
 - **🤝 Peer Network**: Connect with fellow students from local universities
 - **🚀 Skill Development**: Opportunities to enhance technical and soft skills
-
-### 🎯 Project Goals
-- **Inclusive Access**: Democratize access to academic services
-- **Local Community**: Foster collaboration within Pune's student community
-- **Professional Growth**: Bridge gap between academics and industry
-- **Economic Empowerment**: Enable students to monetize their skills
 
 ---
 
@@ -63,12 +50,6 @@
 - **Zod**: Schema validation
 - **PostCSS & Autoprefixer**: CSS processing
 - **Recharts**: Data visualization
-
-### 🛡️ Security Measures
-- **JWT Authentication**: Secure user sessions
-- **Role-based Access**: Granular permission control
-- **Data Encryption**: At-rest and in-transit protection
-- **Input Sanitization**: Protection against injection attacks
 
 ---
 
@@ -139,18 +120,6 @@ The platform supports three distinct user personas:
    - Track student performance
    - Monitor platform engagement
    - Facilitate student opportunities
-
-### 🎯 Core Functionality Matrix
-
-| Feature | Students | Clients | Faculty |
-|---------|----------|---------|---------|
-| **Service Creation** | ✅ | ❌ | ❌ |
-| **Job Posting** | ❌ | ✅ | ❌ |
-| **Application System** | ✅ | ✅ | ❌ |
-| **Real-time Chat** | ✅ | ✅ | ✅ |
-| **Payment Processing** | ✅ | ✅ | ❌ |
-| **Performance Tracking** | ✅ | ✅ | ✅ |
-| **Admin Dashboard** | ❌ | ❌ | ✅ |
 
 ### 🛍️ Service Marketplace
 
@@ -252,13 +221,11 @@ The Supabase PostgreSQL database contains these key tables:
 4. **Access Application**
    Open [http://localhost:3000](http://localhost:3000)
 
-### 🧪 Testing Strategy
+### 🧪 Testing
 
-- **Unit Tests**: Component and function testing with Jest
+- **Unit Tests**: Component and function testing
 - **Integration Tests**: API and database interactions
-- **E2E Tests**: User flow validation with Cypress
-- **Accessibility Testing**: WCAG compliance verification
-- **Performance Testing**: Load and stress testing
+- **E2E Tests**: User flow validation
 
 ### 📦 Build Process
 
@@ -266,14 +233,6 @@ The Supabase PostgreSQL database contains these key tables:
 npm run build
 npm run start
 ```
-
-### 🔄 CI/CD Pipeline
-
-1. **Code Push**: Commit to GitHub repository
-2. **Automated Testing**: Run test suite on PR
-3. **Code Quality**: ESLint and Prettier checks
-4. **Deployment**: Vercel auto-deployment
-5. **Monitoring**: Error tracking and performance metrics
 
 ---
 
@@ -354,21 +313,6 @@ The architecture combines:
 
 With its modular structure and well-defined data models, the platform can be easily extended with additional features while maintaining code quality and performance standards.
 
-### 🚀 Future Enhancements
-
-1. **Mobile Application**: Native iOS/Android app development
-2. **AI Matching**: Intelligent service and job recommendations
-3. **Learning Paths**: Structured skill development programs
-4. **Community Features**: Forums and knowledge sharing
-5. **Analytics Dashboard**: Advanced insights and reporting
-
 ---
 
-<p align="center">
-  <strong>Built with ❤️ for students by students</strong>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Made%20with-Next.js-black?style=for-the-badge&logo=next.js" />
-  <img src="https://img.shields.io/badge/Powered%20by-Supabase-3ECF8E?style=for-the-badge&logo=supabase" />
-</p>
+*Built with ❤️ for students by students*
