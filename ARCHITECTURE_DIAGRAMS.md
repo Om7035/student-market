@@ -8,6 +8,7 @@ Student Market is a full-stack web application built with Next.js 15, React 19, 
 ## 📊 Activity Diagram - User Journey Flow
 
 ```mermaid
+%%{init: { 'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#ffffff', 'secondaryColor': '#ffffff', 'tertiaryColor': '#ffffff', 'primaryTextColor': '#111827', 'textColor': '#111827', 'titleColor': '#111827', 'lineColor': '#1f2937', 'primaryBorderColor': '#1f2937', 'defaultLinkColor': '#1f2937', 'edgeLabelBackground': '#ffffff', 'arrowheadColor': '#1f2937', 'clusterBkg': '#ffffff', 'clusterBorder': '#1f2937', 'fontFamily': 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"', 'fontSize': '14px' }, 'flowchart': { 'nodeSpacing': 40, 'rankSpacing': 60, 'padding': 12 } }}%%
 flowchart TD
     Start([Start]) --> Visit[User Visits Platform]
     
@@ -42,10 +43,10 @@ flowchart TD
     Review --> End
     ManageUsers --> End
     
-    classDef startEnd fill:#e1f5fe,stroke:#01579b,stroke-width:3px
-    classDef studentBox fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef clientBox fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
-    classDef officerBox fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef startEnd fill:#ffffff,stroke:#1f2937,stroke-width:2px,color:#111827
+    classDef studentBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef clientBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef officerBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
     
     class Start,End startEnd
     class StudentFlow,CreateGig,SetPricing,Publish,ManageBids,Deliver,ReceivePayment studentBox
@@ -58,6 +59,7 @@ flowchart TD
 ## 🔄 Sequence Diagram - Service Creation & Order Flow
 
 ```mermaid
+%%{init: { 'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#ffffff', 'secondaryColor': '#ffffff', 'tertiaryColor': '#ffffff', 'primaryTextColor': '#111827', 'textColor': '#111827', 'titleColor': '#111827', 'lineColor': '#1f2937', 'primaryBorderColor': '#1f2937', 'defaultLinkColor': '#1f2937', 'edgeLabelBackground': '#ffffff', 'arrowheadColor': '#1f2937', 'clusterBkg': '#ffffff', 'clusterBorder': '#1f2937', 'fontFamily': 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"', 'fontSize': '14px' }, 'sequence': { 'mirrorActors': false, 'actorMargin': 40, 'messageMargin': 40, 'boxMargin': 20, 'noteMargin': 20, 'messageFontSize': 14, 'noteFontSize': 13, 'actorFontSize': 14 } }}%%
 sequenceDiagram
     participant U as User
     participant F as Frontend
@@ -101,6 +103,7 @@ sequenceDiagram
 ## 🏗️ Class Diagram - System Architecture
 
 ```mermaid
+%%{init: { 'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#ffffff', 'secondaryColor': '#ffffff', 'tertiaryColor': '#ffffff', 'primaryTextColor': '#111827', 'textColor': '#111827', 'titleColor': '#111827', 'lineColor': '#1f2937', 'primaryBorderColor': '#1f2937', 'defaultLinkColor': '#1f2937', 'edgeLabelBackground': '#ffffff', 'arrowheadColor': '#1f2937', 'clusterBkg': '#ffffff', 'clusterBorder': '#1f2937', 'fontFamily': 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"', 'fontSize': '14px' }, 'classDiagram': { 'diagramPadding': 12, 'titleTopMargin': 25, 'nodeSpacing': 40, 'rankSpacing': 60 } }}%%
 classDiagram
     class User {
         +id: string
@@ -235,6 +238,7 @@ classDiagram
 ## 🔧 Component Architecture Diagram
 
 ```mermaid
+%%{init: { 'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#ffffff', 'secondaryColor': '#ffffff', 'tertiaryColor': '#ffffff', 'primaryTextColor': '#111827', 'textColor': '#111827', 'titleColor': '#111827', 'lineColor': '#1f2937', 'primaryBorderColor': '#1f2937', 'defaultLinkColor': '#1f2937', 'edgeLabelBackground': '#ffffff', 'arrowheadColor': '#1f2937', 'clusterBkg': '#ffffff', 'clusterBorder': '#1f2937', 'fontFamily': 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"', 'fontSize': '14px' }, 'flowchart': { 'nodeSpacing': 40, 'rankSpacing': 60, 'padding': 12 } }}%%
 graph TB
     subgraph Frontend [Frontend Layer - Next.js]
         App[App Router]
@@ -277,9 +281,9 @@ graph TB
     Frontend --> Backend
     Backend --> External
     
-    classDef frontendBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    classDef backendBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef externalBox fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef frontendBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef backendBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef externalBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
     
     class App,Layout,Pages,Components,Hooks,Utils frontendBox
     class Auth,DB,Storage,Realtime,Functions backendBox
@@ -291,6 +295,7 @@ graph TB
 ## 📊 Data Flow Architecture
 
 ```mermaid
+%%{init: { 'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#ffffff', 'secondaryColor': '#ffffff', 'tertiaryColor': '#ffffff', 'primaryTextColor': '#111827', 'textColor': '#111827', 'titleColor': '#111827', 'lineColor': '#1f2937', 'primaryBorderColor': '#1f2937', 'defaultLinkColor': '#1f2937', 'edgeLabelBackground': '#ffffff', 'arrowheadColor': '#1f2937', 'clusterBkg': '#ffffff', 'clusterBorder': '#1f2937', 'fontFamily': 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"', 'fontSize': '14px' }, 'flowchart': { 'nodeSpacing': 40, 'rankSpacing': 60, 'padding': 12 } }}%%
 flowchart TD
     A[User Action] --> B{Action Type}
     
@@ -330,6 +335,7 @@ flowchart TD
 ## 🚀 Deployment Architecture
 
 ```mermaid
+%%{init: { 'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#ffffff', 'secondaryColor': '#ffffff', 'tertiaryColor': '#ffffff', 'primaryTextColor': '#111827', 'textColor': '#111827', 'titleColor': '#111827', 'lineColor': '#1f2937', 'primaryBorderColor': '#1f2937', 'defaultLinkColor': '#1f2937', 'edgeLabelBackground': '#ffffff', 'arrowheadColor': '#1f2937', 'clusterBkg': '#ffffff', 'clusterBorder': '#1f2937', 'fontFamily': 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"', 'fontSize': '14px' }, 'flowchart': { 'nodeSpacing': 40, 'rankSpacing': 60, 'padding': 12 } }}%%
 graph TB
     subgraph Production [Production Environment]
         Vercel[Vercel Hosting]
@@ -360,8 +366,8 @@ graph TB
     API --> Database
     API --> Razorpay
     
-    classDef prodBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    classDef devBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef prodBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef devBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
     
     class Vercel,Supabase,External,Frontend,API,Database,Auth,Storage,Razorpay,Email prodBox
     class Local,DevServer,LocalSupabase devBox
@@ -372,6 +378,7 @@ graph TB
 ## 📱 Mobile-First Architecture
 
 ```mermaid
+%%{init: { 'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#ffffff', 'secondaryColor': '#ffffff', 'tertiaryColor': '#ffffff', 'primaryTextColor': '#111827', 'textColor': '#111827', 'titleColor': '#111827', 'lineColor': '#1f2937', 'primaryBorderColor': '#1f2937', 'defaultLinkColor': '#1f2937', 'edgeLabelBackground': '#ffffff', 'arrowheadColor': '#1f2937', 'clusterBkg': '#ffffff', 'clusterBorder': '#1f2937', 'fontFamily': 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"', 'fontSize': '14px' }, 'flowchart': { 'nodeSpacing': 40, 'rankSpacing': 60, 'padding': 12 } }}%%
 graph LR
     Mobile[Mobile Device] --> PWA[PWA Features]
     
@@ -395,9 +402,9 @@ graph LR
     Responsive --> Touch
     Push --> Notifications
     
-    classDef mobileBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    classDef pwaBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef uiBox fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef mobileBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef pwaBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef uiBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
     
     class Mobile mobileBox
     class ServiceWorker,Responsive,Offline,Push pwaBox
@@ -409,6 +416,7 @@ graph LR
 ## 🔒 Security Architecture
 
 ```mermaid
+%%{init: { 'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#ffffff', 'secondaryColor': '#ffffff', 'tertiaryColor': '#ffffff', 'primaryTextColor': '#111827', 'textColor': '#111827', 'titleColor': '#111827', 'lineColor': '#1f2937', 'primaryBorderColor': '#1f2937', 'defaultLinkColor': '#1f2937', 'edgeLabelBackground': '#ffffff', 'arrowheadColor': '#1f2937', 'clusterBkg': '#ffffff', 'clusterBorder': '#1f2937', 'fontFamily': 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"', 'fontSize': '14px' }, 'flowchart': { 'nodeSpacing': 40, 'rankSpacing': 60, 'padding': 12 } }}%%
 graph TB
     Security[Security Layer] --> Auth[Authentication]
     Security --> Authz[Authorization]
@@ -433,9 +441,9 @@ graph TB
     PaymentSecurity[Payment Security] --> PCI[PCI Compliance]
     PaymentSecurity --> Escrow[Escrow Protection]
     
-    classDef securityBox fill:#ffebee,stroke:#c62828,stroke-width:2px
-    classDef authBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    classDef dataBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef securityBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef authBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef dataBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
     
     class Security securityBox
     class Auth,Authz,SupabaseAuth,JWT,Social,RLS,UserPolicies,RolePolicies authBox
@@ -447,6 +455,7 @@ graph TB
 ## 🎨 UI/UX Architecture
 
 ```mermaid
+%%{init: { 'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#ffffff', 'secondaryColor': '#ffffff', 'tertiaryColor': '#ffffff', 'primaryTextColor': '#111827', 'textColor': '#111827', 'titleColor': '#111827', 'lineColor': '#1f2937', 'primaryBorderColor': '#1f2937', 'defaultLinkColor': '#1f2937', 'edgeLabelBackground': '#ffffff', 'arrowheadColor': '#1f2937', 'clusterBkg': '#ffffff', 'clusterBorder': '#1f2937', 'fontFamily': 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"', 'fontSize': '14px' }, 'flowchart': { 'nodeSpacing': 40, 'rankSpacing': 60, 'padding': 12 } }}%%
 graph TB
     DesignSystem[Design System] --> Theme[Theme Provider]
     DesignSystem --> Components[Component Library]
@@ -468,9 +477,9 @@ graph TB
     UX --> Errors[Error Handling]
     UX --> Feedback[Feedback Systems]
     
-    classDef designBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef themeBox fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
-    classDef uxBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef designBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef themeBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef uxBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
     
     class DesignSystem designBox
     class Theme,DarkMode,Colors,Typography themeBox
@@ -482,6 +491,7 @@ graph TB
 ## 📈 Performance Architecture
 
 ```mermaid
+%%{init: { 'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#ffffff', 'secondaryColor': '#ffffff', 'tertiaryColor': '#ffffff', 'primaryTextColor': '#111827', 'textColor': '#111827', 'titleColor': '#111827', 'lineColor': '#1f2937', 'primaryBorderColor': '#1f2937', 'defaultLinkColor': '#1f2937', 'edgeLabelBackground': '#ffffff', 'arrowheadColor': '#1f2937', 'clusterBkg': '#ffffff', 'clusterBorder': '#1f2937', 'fontFamily': 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"', 'fontSize': '14px' }, 'flowchart': { 'nodeSpacing': 40, 'rankSpacing': 60, 'padding': 12 } }}%%
 graph TB
     Performance[Performance Optimization] --> Frontend[Frontend Optimization]
     Performance --> Backend[Backend Optimization]
@@ -504,10 +514,10 @@ graph TB
     Monitoring --> Tracking[Error Tracking]
     Monitoring --> Analytics[User Analytics]
     
-    classDef perfBox fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
-    classDef frontendBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    classDef backendBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef monitorBox fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef perfBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef frontendBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef backendBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef monitorBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
     
     class Performance perfBox
     class Frontend,CodeSplit,LazyLoad,Images,Cache frontendBox
@@ -520,6 +530,7 @@ graph TB
 ## 🔄 State Management Architecture
 
 ```mermaid
+%%{init: { 'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#ffffff', 'secondaryColor': '#ffffff', 'tertiaryColor': '#ffffff', 'primaryTextColor': '#111827', 'textColor': '#111827', 'titleColor': '#111827', 'lineColor': '#1f2937', 'primaryBorderColor': '#1f2937', 'defaultLinkColor': '#1f2937', 'edgeLabelBackground': '#ffffff', 'arrowheadColor': '#1f2937', 'clusterBkg': '#ffffff', 'clusterBorder': '#1f2937', 'fontFamily': 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"', 'fontSize': '14px' }, 'flowchart': { 'nodeSpacing': 40, 'rankSpacing': 60, 'padding': 12 } }}%%
 graph TB
     State[State Management] --> Client[Client State]
     State --> Server[Server State]
@@ -540,10 +551,10 @@ graph TB
     Realtime[Real-time Updates] --> Subscriptions[WebSocket Subscriptions]
     Realtime --> Sync[State Synchronization]
     
-    classDef stateBox fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef clientBox fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    classDef serverBox fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
-    classDef realtimeBox fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef stateBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef clientBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef serverBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
+    classDef realtimeBox fill:#ffffff,stroke:#1f2937,stroke-width:1.5px,color:#111827
     
     class State stateBox
     class Client,Local,Forms,UI clientBox
