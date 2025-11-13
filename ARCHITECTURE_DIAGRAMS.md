@@ -11,102 +11,46 @@ Student Market is a full-stack web application built with Next.js 15, React 19, 
 flowchart TD
     Start([Start]) --> Visit[User Visits Platform]
     
-    subgraph Authentication [Authentication Module]
-        Browse[Browse Services as Guest]
-        Auth[User Authentication via Supabase]
-    end
+    Visit --> Browse[Browse Services as Guest]
+    Browse --> Auth[User Authentication]
     
-    Visit --> Browse
-    Browse --> Auth
+    Auth --> SelectRole{Select Role}
     
-    subgraph RoleSelection [Role Selection Module]
-        SelectRole[Select Role]
-        Onboarding[Complete Onboarding]
-        Profile[Profile Setup]
-    end
+    SelectRole -->|Student| StudentFlow[Student Workflow]
+    SelectRole -->|Client| ClientFlow[Client Workflow]
+    SelectRole -->|Officer| OfficerFlow[Officer Workflow]
     
-    Auth --> SelectRole
-    SelectRole --> Onboarding
-    Onboarding --> Profile
+    StudentFlow --> CreateGig[Create Gig/Service]
+    CreateGig --> SetPricing[Set Pricing & Delivery]
+    SetPricing --> Publish[Publish Service]
+    Publish --> ManageBids[Manage Bids]
+    ManageBids --> Deliver[Deliver Work]
+    Deliver --> ReceivePayment[Receive Payment]
     
-    subgraph StudentFlow [Student Workflow]
-        CreateGig[Create Gig/Service]
-        SetPricing[Set Pricing & Delivery]
-        UploadMedia[Upload Media]
-        Publish[Publish Service]
-        ManageBids[Manage Bids]
-        Communicate1[Communicate with Clients]
-        Deliver[Deliver Work]
-        ReceivePayment[Receive Payment]
-    end
+    ClientFlow --> BrowseServices[Browse/Search Services]
+    BrowseServices --> ViewDetails[View Service Details]
+    ViewDetails --> PlaceOrder[Place Order]
+    PlaceOrder --> MakePayment[Make Payment]
+    MakePayment --> ReceiveDelivery[Receive Delivery]
+    ReceiveDelivery --> Review[Review & Rate]
     
-    subgraph ClientFlow [Client Workflow]
-        BrowseServices[Browse/Search Services]
-        Filter[Filter by Category/Price]
-        ViewDetails[View Service Details]
-        PlaceOrder[Place Order/Submit Bid]
-        MakePayment[Make Payment via Razorpay]
-        Communicate2[Communicate with Student]
-        ReceiveDelivery[Receive Delivery]
-        Review[Review & Rate Service]
-    end
+    OfficerFlow --> Dashboard[Access Analytics Dashboard]
+    Dashboard --> Monitor[Monitor Platform]
+    Monitor --> ManageUsers[Manage Users]
     
-    subgraph OfficerFlow [Officer Workflow]
-        Dashboard[Access Analytics Dashboard]
-        Monitor[Monitor Platform Metrics]
-        ManageUsers[Manage Users]
-        Reports[View Reports]
-    end
+    ReceivePayment --> End([End])
+    Review --> End
+    ManageUsers --> End
     
-    Profile --> StudentFlow
-    Profile --> ClientFlow
-    Profile --> OfficerFlow
-    
-    CreateGig --> SetPricing
-    SetPricing --> UploadMedia
-    UploadMedia --> Publish
-    Publish --> ManageBids
-    ManageBids --> Communicate1
-    Communicate1 --> Deliver
-    Deliver --> ReceivePayment
-    
-    BrowseServices --> Filter
-    Filter --> ViewDetails
-    ViewDetails --> PlaceOrder
-    PlaceOrder --> MakePayment
-    MakePayment --> Communicate2
-    Communicate2 --> ReceiveDelivery
-    ReceiveDelivery --> Review
-    
-    Dashboard --> Monitor
-    Monitor --> ManageUsers
-    ManageUsers --> Reports
-    
-    subgraph CommonFeatures [Common Features]
-        Messaging[Real-time Messaging]
-        Notifications[Notifications Management]
-        ProfileMgmt[Profile Management]
-        Wallet[Wallet & Payment History]
-        Ratings[Reviews & Ratings]
-    end
-    
-    StudentFlow --> CommonFeatures
-    ClientFlow --> CommonFeatures
-    OfficerFlow --> CommonFeatures
-    
-    CommonFeatures --> End([End])
-    
-    classDef authBox fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef startEnd fill:#e1f5fe,stroke:#01579b,stroke-width:3px
     classDef studentBox fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
     classDef clientBox fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
     classDef officerBox fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef commonBox fill:#fce4ec,stroke:#880e4f,stroke-width:2px
     
-    class Browse,Auth authBox
-    class CreateGig,SetPricing,UploadMedia,Publish,ManageBids,Communicate1,Deliver,ReceivePayment studentBox
-    class BrowseServices,Filter,ViewDetails,PlaceOrder,MakePayment,Communicate2,ReceiveDelivery,Review clientBox
-    class Dashboard,Monitor,ManageUsers,Reports officerBox
-    class Messaging,Notifications,ProfileMgmt,Wallet,Ratings commonBox
+    class Start,End startEnd
+    class StudentFlow,CreateGig,SetPricing,Publish,ManageBids,Deliver,ReceivePayment studentBox
+    class ClientFlow,BrowseServices,ViewDetails,PlaceOrder,MakePayment,ReceiveDelivery,Review clientBox
+    class OfficerFlow,Dashboard,Monitor,ManageUsers officerBox
 ```
 
 ---
@@ -115,38 +59,41 @@ flowchart TD
 
 ```mermaid
 sequenceDiagram
-    participant User
-    participant Frontend as Next.js Frontend
-    participant API as API Routes
-    participant Supabase as Supabase Backend
-    participant Razorpay as Razorpay Gateway
+    participant U as User
+    participant F as Frontend
+    participant A as API Routes
+    participant S as Supabase
+    participant R as Razorpay
     
-    User->>Frontend: Create Service Request
-    Frontend->>API: POST /api/services
-    API->>Supabase: Validate & Store Service
-    Supabase-->>API: Service Created
-    API-->>Frontend: Service ID Response
-    Frontend-->>User: Service Published
+    Note over U,R: Service Creation Flow
+    U->>F: Create Service Request
+    F->>A: POST /api/services
+    A->>S: Validate & Store Service
+    S-->>A: Service Created
+    A-->>F: Service ID Response
+    F-->>U: Service Published
     
-    User->>Frontend: Browse Services
-    Frontend->>API: GET /api/services
-    API->>Supabase: Query Services
-    Supabase-->>API: Service List
-    API-->>Frontend: Filtered Services
-    Frontend-->>User: Display Services
+    Note over U,R: Order & Payment Flow
+    U->>F: Browse & Select Service
+    F->>A: GET /api/services
+    A->>S: Query Services
+    S-->>A: Service List
+    A-->>F: Filtered Services
+    F-->>U: Display Services
     
-    User->>Frontend: Place Order
-    Frontend->>API: POST /api/orders
-    API->>Supabase: Create Order
-    Supabase-->>API: Order Created
-    API-->>Frontend: Order ID
-    Frontend->>Razorpay: Initiate Payment
-    Razorpay-->>Frontend: Payment Success
-    Frontend->>API: Update Payment Status
-    API->>Supabase: Mark Order Paid
-    Supabase-->>API: Confirmation
-    API-->>Frontend: Order Confirmed
-    Frontend-->>User: Order Success
+    U->>F: Place Order
+    F->>A: POST /api/orders
+    A->>S: Create Order
+    S-->>A: Order Created
+    A-->>F: Order ID
+    
+    F->>R: Initiate Payment
+    R-->>F: Payment Success
+    F->>A: Update Payment Status
+    A->>S: Mark Order Paid
+    S-->>A: Confirmation
+    A-->>F: Order Confirmed
+    F-->>U: Order Success
 ```
 
 ---
@@ -161,7 +108,6 @@ classDiagram
         +name: string
         +role: Role
         +profile: UserProfile
-        +wallet: Wallet
         +signIn()
         +signOut()
         +updateProfile()
@@ -174,7 +120,6 @@ classDiagram
         +price: number
         +category: Category
         +studentId: string
-        +media: Media[]
         +status: ServiceStatus
         +create()
         +update()
@@ -223,27 +168,66 @@ classDiagram
         +update()
     }
     
-    User "1" --> "*" Service : creates
-    User "1" --> "*" Order : places
-    User "1" --> "*" Message : sends
-    User "1" --> "*" Review : writes
-    Service "1" --> "*" Order : generates
-    Order "1" --> "1" Payment : has
-    Order "1" --> "1" Review : receives
-    
     class Category {
         +id: string
         +name: string
         +description: string
     }
     
-    Service --> Category : belongs to
-    
     class Notification {
         +id: string
+        +userId: string
+        +type: string
+        +message: string
+        +read: boolean
+        +send()
+        +markAsRead()
     }
     
+    %% Relationships
+    User "1" --> "*" Service : creates
+    User "1" --> "*" Order : places
+    User "1" --> "*" Message : sends
+    User "1" --> "*" Review : writes
     User "1" --> "*" Notification : receives
+    
+    Service "1" --> "*" Order : generates
+    Service --> Category : belongs to
+    
+    Order "1" --> "1" Payment : has
+    Order "1" --> "0..1" Review : receives
+    
+    %% Enumerations
+    class Role {
+        <<enumeration>>
+        STUDENT
+        CLIENT
+        OFFICER
+    }
+    
+    class ServiceStatus {
+        <<enumeration>>
+        DRAFT
+        PUBLISHED
+        PAUSED
+    }
+    
+    class OrderStatus {
+        <<enumeration>>
+        PENDING
+        PAID
+        IN_PROGRESS
+        COMPLETED
+        CANCELLED
+    }
+    
+    class PaymentStatus {
+        <<enumeration>>
+        PENDING
+        COMPLETED
+        FAILED
+        REFUNDED
+    }
 ```
 
 ---
